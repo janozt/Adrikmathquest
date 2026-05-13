@@ -3,278 +3,555 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MathQuest - Plataforma Adaptativa por Edades</title>
+    <title>MathQuest - Estilo Smartick</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #6366f1;
-            --secondary: #8b5cf6;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text: #1e293b;
-            --text-muted: #64748b;
-            --radius: 20px;
-            --scale: 1;
-            --anim-speed: 0.3s;
-        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); transition: background var(--anim-speed); }
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 50%, #98D8C8 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
         
-        /* Animaciones */
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        @keyframes pop { 0%{transform:scale(0.8);opacity:0} 70%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
-        @keyframes slide { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
-        @keyframes confetti { 0%{transform:translateY(0) rotate(0);opacity:1} 100%{transform:translateY(-150px) rotate(360deg);opacity:0} }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+        @keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(255,255,255,0.8)} 50%{box-shadow:0 0 40px rgba(255,255,255,1)} }
+        @keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 75%{transform:translateX(10px)} }
+        @keyframes pop { 0%{transform:scale(0.8);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
         
         .float { animation: float 3s ease-in-out infinite; }
-        .pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        .slide { animation: slide 0.5s ease-out forwards; }
-        .shake { animation: shake 0.4s ease-in-out; }
-        
-        .card { background: var(--card-bg); border-radius: var(--radius); padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); transition: all 0.3s; }
-        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
-        
-        .btn { padding: 12px 20px; border-radius: 12px; border: none; font-family: 'Nunito'; font-weight: 700; cursor: pointer; transition: all 0.2s; transform: scale(var(--scale)); }
-        .btn:active { transform: scale(0.95); }
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px var(--primary)40; }
-        .btn-secondary { background: var(--secondary); color: white; }
-        .btn-outline { background: transparent; border: 2px solid #e2e8f0; color: var(--text-muted); }
-        
-        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
-        
-        /* Temas por edad */
-        .theme-4-5 { --primary: #fbbf24; --secondary: #f87171; --bg: #fefce8; --radius: 28px; --scale: 1.15; }
-        .theme-6-7 { --primary: #6366f1; --secondary: #ec4899; --bg: #e0e7ff; --radius: 24px; --scale: 1.05; }
-        .theme-8-9 { --primary: #06b6d4; --secondary: #10b981; --bg: #ecfeff; --radius: 20px; --scale: 1; }
-        .theme-10-12 { --primary: #8b5cf6; --secondary: #f59e0b; --bg: #f5f3ff; --radius: 18px; --scale: 0.95; }
-        .theme-13-14 { --primary: #0f172a; --secondary: #3b82f6; --bg: #f8fafc; --radius: 16px; --scale: 0.9; }
+        .pulse { animation: pulse 2s ease-in-out infinite; }
+        .glow { animation: glow 2s ease-in-out infinite; }
+        .slide-up { animation: slideUp 0.5s ease-out; }
+        .shake { animation: shake 0.5s ease-in-out; }
+        .pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; opacity: 0.6; }
+        .bubble {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0.4));
+            border: 4px solid rgba(255,255,255,0.8);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1), inset 0 0 20px rgba(255,255,255,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+        
+        .bubble:hover:not(.locked) {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15), inset 0 0 30px rgba(255,255,255,0.8);
+        }
+        
+        .bubble.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+            filter: grayscale(0.5);
+        }
+        
+        .bubble-icon {
+            font-size: 64px;
+            margin-bottom: 8px;
+        }
+        
+        .bubble-label {
+            font-weight: 800;
+            font-size: 16px;
+            color: #2C3E50;
+            text-align: center;
+        }
+        
+        .lock-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tag-option {
+            background: white;
+            border: 4px solid #E0E0E0;
+            border-radius: 16px;
+            padding: 16px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 180px;
+        }
+        
+        .tag-option:hover {
+            border-color: #3498DB;
+            transform: translateX(8px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .tag-option.selected {
+            border-color: #2ECC71;
+            background: #E8F8F0;
+            transform: scale(1.05);
+        }
+        
+        .tag-option.wrong {
+            border-color: #E74C3C;
+            background: #FDEDEC;
+            animation: shake 0.5s;
+        }
+
+        .gumball-machine {
+            width: 150px;
+            height: 220px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .gumball-machine:hover {
+            transform: scale(1.05);
+        }
+        
+        .gumball-globe {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid rgba(0,0,0,0.2);
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .gumballs-filled {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 2px;
+            padding: 8px;
+        }
+        
+        .gumball {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.2);
+        }
+
+        .world-bg {
+            background: linear-gradient(180deg, #FFB347 0%, #FFCC99 40%, #DEB887 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .world-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.3;
+        }
+
+        .character {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 80px;
+            animation: float 3s ease-in-out infinite;
+            z-index: 100;
+            cursor: pointer;
+        }
+
+        .xp-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.3);
+            border-radius: 20px;
+            height: 30px;
+            overflow: hidden;
+            border: 3px solid white;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #2ECC71, #27AE60);
+            height: 100%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 17px;
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useCallback, useContext, createContext, useMemo } = React;
+        const { useState, useEffect, useRef } = React;
 
         // ==========================================
-        // 1. CONFIGURACIÓN POR EDADES & TEMAS
+        // CONFIGURACIÓN POR EDADES - SMARTICK STYLE
         // ==========================================
         const AGE_CONFIG = {
             '4-5': {
-                label: 'Exploradores',
-                themeClass: 'theme-4-5',
-                colors: { primary: '#fbbf24', secondary: '#f87171', accent: '#86efac' },
-                ui: { fontSize: '18px', btnSize: 'large', icons: 'big', spacing: 'lg' },
-                games: ['counting', 'shapes', 'colors', 'matching'],
-                rewards: { coinName: 'Estrellitas', icon: '⭐', xpMult: 0.8 },
-                description: 'Aprendizaje visual, sonidos y arrastrar/soltar'
+                label: 'Preescolar',
+                worlds: ['numeros', 'colores', 'formas'],
+                lockedWorlds: ['sumas', 'restas'],
+                exercises: ['counting', 'colors', 'shapes', 'matching', 'full-empty', 'habitats'],
+                maxDifficulty: 3,
+                character: '',
+                bgColor: '#FFE5B4'
             },
             '6-7': {
-                label: 'Aventureros',
-                themeClass: 'theme-6-7',
-                colors: { primary: '#6366f1', secondary: '#ec4899', accent: '#a78bfa' },
-                ui: { fontSize: '16px', btnSize: 'medium', icons: 'medium', spacing: 'md' },
-                games: ['addsub', 'sequences', 'memory', 'compare'],
-                rewards: { coinName: 'Gemas', icon: '💎', xpMult: 1.0 },
-                description: 'Sumas, restas, memoria y secuencias'
+                label: 'Básico',
+                worlds: ['numeros', 'colores', 'formas', 'sumas', 'restas'],
+                lockedWorlds: ['multiplicacion'],
+                exercises: ['addsub', 'sequences', 'compare', 'full-empty', 'habitats', 'colors'],
+                maxDifficulty: 5,
+                character: '🦊',
+                bgColor: '#B5EAD7'
             },
             '8-9': {
-                label: 'Constructores',
-                themeClass: 'theme-8-9',
-                colors: { primary: '#06b6d4', secondary: '#10b981', accent: '#34d399' },
-                ui: { fontSize: '15px', btnSize: 'medium', icons: 'medium', spacing: 'md' },
-                games: ['muldiv', 'problems', 'timed', 'missions'],
-                rewards: { coinName: 'Monedas', icon: '🪙', xpMult: 1.2 },
-                description: 'Multiplicación, división y retos por tiempo'
+                label: 'Intermedio',
+                worlds: ['numeros', 'sumas', 'restas', 'multiplicacion', 'division_basica'],
+                lockedWorlds: ['fracciones'],
+                exercises: ['muldiv', 'problems', 'timed', 'geometry', 'logic'],
+                maxDifficulty: 7,
+                character: '🦁',
+                bgColor: '#C7CEEA'
             },
             '10-12': {
-                label: 'Estrategas',
-                themeClass: 'theme-10-12',
-                colors: { primary: '#8b5cf6', secondary: '#f59e0b', accent: '#c084fc' },
-                ui: { fontSize: '14px', btnSize: 'standard', icons: 'standard', spacing: 'sm' },
-                games: ['fractions', 'geometry', 'logic', 'rankings'],
-                rewards: { coinName: 'Puntos', icon: '🏆', xpMult: 1.5 },
-                description: 'Fracciones, geometría y lógica avanzada'
+                label: 'Avanzado',
+                worlds: ['fracciones', 'geometria', 'logica', 'problemas'],
+                lockedWorlds: ['algebra'],
+                exercises: ['fractions', 'geometry', 'algebra', 'reasoning', 'stats'],
+                maxDifficulty: 10,
+                character: '🦅',
+                bgColor: '#FFDAC1'
             },
             '13-14': {
-                label: 'Maestros',
-                themeClass: 'theme-13-14',
-                colors: { primary: '#0f172a', secondary: '#3b82f6', accent: '#60a5fa' },
-                ui: { fontSize: '13px', btnSize: 'compact', icons: 'standard', spacing: 'sm' },
-                games: ['algebra', 'reasoning', 'advanced', 'stats'],
-                rewards: { coinName: 'Créditos', icon: '🎓', xpMult: 1.8 },
-                description: 'Álgebra, razonamiento y estadísticas'
+                label: 'Experto',
+                worlds: ['algebra', 'razonamiento', 'estadistica', 'desafios'],
+                lockedWorlds: [],
+                exercises: ['algebra', 'reasoning', 'advanced', 'optimization'],
+                maxDifficulty: 12,
+                character: '🦉',
+                bgColor: '#E2F0CB'
             }
         };
 
         // ==========================================
-        // 2. MOTOR ADAPTATIVO (IA Simulada)
+        // GENERADORES DE EJERCICIOS TIPO SMARTICK
         // ==========================================
-        const AdaptiveEngine = {
-            track(sessionHistory, currentDifficulty, accuracy, speed) {
-                if (sessionHistory.length < 3) return currentDifficulty;
-                const last3 = sessionHistory.slice(-3);
-                const avgAccuracy = last3.reduce((a,b) => a + (b.correct ? 1 : 0), 0) / 3;
-                const avgSpeed = last3.reduce((a,b) => a + b.time, 0) / 3;
-
-                if (avgAccuracy >= 0.85 && avgSpeed < 4) return Math.min(10, currentDifficulty + 1);
-                if (avgAccuracy <= 0.5 || avgSpeed > 12) return Math.max(1, currentDifficulty - 1);
-                return currentDifficulty;
-            },
-            generateNext(ageGroup, difficulty, lastPerformance) {
-                // Ajusta probabilidad de temas según rendimiento histórico
-                const weights = { ...lastPerformance?.weights || {} };
-                const weakAreas = Object.entries(weights).filter(([k,v]) => v < 0.6).map(x => x[0]);
-                const nextType = weakAreas.length > 0 && Math.random() > 0.3 ? weakAreas[0] : AGE_CONFIG[ageGroup].games[Math.floor(Math.random() * AGE_CONFIG[ageGroup].games.length)];
-                return { type: nextType, difficulty: difficulty, adaptive: true };
-            }
-        };
-
-        // ==========================================
-        // 3. GENERADORES DE EJERCICIOS POR EDAD
-        // ==========================================
-        const QuestionGenerator = {
-            'counting': (d) => {
-                const count = Math.floor(Math.random() * (d <= 2 ? 5 : 10)) + 1;
-                const items = ['🍎', '🐶', '🌟', '🚗', '🎈'];
-                const item = items[Math.floor(Math.random() * items.length)];
-                const display = Array(count).fill(item).join(' ');
-                return { q: `¿Cuántos ${item} hay?`, visual: display, ans: count, opts: [count-1, count, count+1, count+2].filter(x => x > 0).sort(() => Math.random()-0.5) };
-            },
-            'shapes': (d) => {
-                const shapes = [{name: 'Círculo', icon: '⭕'}, {name: 'Cuadrado', icon: '🟦'}, {name: 'Triángulo', icon: '🔺'}, {name: 'Estrella', icon: '⭐'}];
-                const target = shapes[Math.floor(Math.random() * shapes.length)];
-                return { q: 'Toca la figura correcta:', visual: `Busca: ${target.icon}`, ans: target.name, opts: shapes.map(s => s.name) };
-            },
-            'colors': (d) => {
-                const colors = ['Rojo', 'Azul', 'Verde', 'Amarillo'];
+        const ExerciseGenerator = {
+            // Ejercicio de colores (como imagen 2)
+            colors: (difficulty) => {
+                const colors = [
+                    { name: 'Verde', hex: '#2ECC71', icon: '🟢', basket: '🧺' },
+                    { name: 'Rojo', hex: '#E74C3C', icon: '🔴', basket: '🧺' },
+                    { name: 'Azul', hex: '#3498DB', icon: '🔵', basket: '🧺' },
+                    { name: 'Amarillo', hex: '#F1C40F', icon: '🟡', basket: '🧺' }
+                ];
                 const target = colors[Math.floor(Math.random() * colors.length)];
-                const hex = {Rojo:'#ef4444', Azul:'#3b82f6', Verde:'#22c55e', Amarillo:'#eab308'}[target];
-                return { q: `¿De qué color es este bloque?`, visual: `<div style="width:60px;height:60px;background:${hex};border-radius:12px;display:inline-block"></div>`, ans: target, opts: colors };
+                const items = ['🍎', '🍐', '🍊', '🫐', '', ''];
+                const item = items[Math.floor(Math.random() * items.length)];
+                
+                return {
+                    type: 'colors',
+                    instruction: 'Marca las etiquetas correctas.',
+                    question: `¿De qué color es esta ${item}?`,
+                    visual: `<div style="font-size:80px">${item}</div>`,
+                    correctAnswer: target.name,
+                    options: colors.map(c => ({
+                        label: c.name,
+                        visual: `<div style="display:flex;align-items:center;gap:8px"><span style="font-size:32px">${c.basket}</span><div style="width:32px;height:32px;background:${c.hex};border-radius:50%"></div></div>`,
+                        value: c.name
+                    }))
+                };
             },
-            'addsub': (d) => {
-                const max = d <= 2 ? 10 : 20;
+
+            // Ejercicio de lleno/vacío (como imagen 3)
+            'full-empty': (difficulty) => {
+                const items = [
+                    { name: 'máquina de chicles', full: '🌈', empty: '' },
+                    { name: 'vaso', full: '💧', empty: '' },
+                    { name: 'canasta', full: '🍎', empty: '' },
+                    { name: 'frasco', full: '🍪', empty: '' }
+                ];
+                const item = items[Math.floor(Math.random() * items.length)];
+                const fullSide = Math.random() > 0.5 ? 'left' : 'right';
+                
+                return {
+                    type: 'full-empty',
+                    instruction: 'Responde la pregunta.',
+                    question: '¿Cuál está llena?',
+                    visual: `
+                        <div style="display:flex;justify-content:center;gap:40px;margin:20px 0">
+                            <div class="gumball-machine" style="${fullSide === 'left' ? 'opacity:1' : 'opacity:0.5'}">
+                                <div class="gumball-globe">
+                                    ${fullSide === 'left' ? `
+                                        <div class="gumballs-filled">
+                                            ${Array(25).fill(0).map(() => `<div class="gumball" style="background:${['#FF6B6B','#4ECDC4','#FFE66D','#95E1D3'][Math.floor(Math.random()*4)]}"></div>`).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <div style="width:80px;height:100px;background:linear-gradient(180deg,#E74C3C,#C0392B);margin:0 auto;border-radius:0 0 20px 20px;position:relative">
+                                    <div style="position:absolute;top:20px;left:50%;transform:translateX(-50%);width:40px;height:50px;background:#95A5A6;border-radius:8px"></div>
+                                </div>
+                            </div>
+                            <div class="gumball-machine" style="${fullSide === 'right' ? 'opacity:1' : 'opacity:0.5'}">
+                                <div class="gumball-globe">
+                                    ${fullSide === 'right' ? `
+                                        <div class="gumballs-filled">
+                                            ${Array(25).fill(0).map(() => `<div class="gumball" style="background:${['#FF6B6B','#4ECDC4','#FFE66D','#95E1D3'][Math.floor(Math.random()*4)]}"></div>`).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <div style="width:80px;height:100px;background:linear-gradient(180deg,#E74C3C,#C0392B);margin:0 auto;border-radius:0 0 20px 20px;position:relative">
+                                    <div style="position:absolute;top:20px;left:50%;transform:translateX(-50%);width:40px;height:50px;background:#95A5A6;border-radius:8px"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `,
+                    correctAnswer: fullSide,
+                    options: [
+                        { label: 'Izquierda', value: 'left', visual: '⬅️' },
+                        { label: 'Derecha', value: 'right', visual: '➡️' }
+                    ]
+                };
+            },
+
+            // Ejercicio de hábitats (como imágenes 4-5)
+            habitats: (difficulty) => {
+                const animals = [
+                    { name: 'elefante', icon: '🐘', habitat: 'Sabana', habitatIcon: '', wrong: ['Océano', 'Cielo'] },
+                    { name: 'tiburón', icon: '🦈', habitat: 'Océano', habitatIcon: '🌊', wrong: ['Sabana', 'Cielo'] },
+                    { name: 'águila', icon: '🦅', habitat: 'Cielo', habitatIcon: '☁️', wrong: ['Océano', 'Sabana'] },
+                    { name: 'oso', icon: '🐻', habitat: 'Bosque', habitatIcon: '🌲', wrong: ['Océano', 'Cielo'] },
+                    { name: 'pez', icon: '🐠', habitat: 'Océano', habitatIcon: '🌊', wrong: ['Sabana', 'Cielo'] }
+                ];
+                const animal = animals[Math.floor(Math.random() * animals.length)];
+                const allHabitats = [
+                    { name: 'Océano', icon: '🌊', color: '#3498DB' },
+                    { name: 'Sabana', icon: '🌍', color: '#F1C40F' },
+                    { name: 'Cielo', icon: '☁️', color: '#95A5A6' },
+                    { name: 'Bosque', icon: '🌲', color: '#27AE60' }
+                ];
+                
+                const options = [
+                    allHabitats.find(h => h.name === animal.habitat),
+                    ...allHabitats.filter(h => animal.wrong.includes(h.name)).slice(0, 2)
+                ].sort(() => Math.random() - 0.5);
+
+                return {
+                    type: 'habitats',
+                    instruction: 'Marca las etiquetas correctas.',
+                    question: `¿Dónde vive el/la ${animal.name}?`,
+                    visual: `<div style="font-size:100px">${animal.icon}</div>`,
+                    correctAnswer: animal.habitat,
+                    options: options.map(h => ({
+                        label: h.name,
+                        visual: `<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="font-size:40px">${h.icon}</div><div style="font-weight:700;font-size:14px">${h.name}</div></div>`,
+                        value: h.name
+                    }))
+                };
+            },
+
+            // Conteo (para 4-5 años)
+            counting: (difficulty) => {
+                const max = difficulty * 3;
+                const count = Math.floor(Math.random() * max) + 1;
+                const items = ['🍎', '🌟', '🎈', '', '', ''];
+                const item = items[Math.floor(Math.random() * items.length)];
+                
+                return {
+                    type: 'counting',
+                    instruction: 'Cuenta los objetos.',
+                    question: '¿Cuántos hay?',
+                    visual: `<div style="font-size:40px;letter-spacing:8px">${Array(count).fill(item).join(' ')}</div>`,
+                    correctAnswer: count,
+                    options: [count-1, count, count+1, count+2].filter(x => x > 0).sort(() => Math.random() - 0.5)
+                        .map(n => ({ label: n.toString(), value: n, visual: `<div style="font-size:24px;font-weight:800">${n}</div>` }))
+                };
+            },
+
+            // Sumas y restas (6-7 años)
+            addsub: (difficulty) => {
+                const max = difficulty * 3;
                 const isAdd = Math.random() > 0.5;
                 const a = Math.floor(Math.random() * max) + 1;
                 const b = Math.floor(Math.random() * (isAdd ? max - a : a)) + 1;
-                return { q: `${a} ${isAdd ? '+' : '-'} ${b} = ?`, visual: '', ans: isAdd ? a+b : a-b, opts: [isAdd?a+b+1:a-b-2, isAdd?a+b:a-b, isAdd?a+b-1:a-b+1, isAdd?a+b+2:a-b-2].filter(x=>x>=0) };
+                
+                return {
+                    type: 'addsub',
+                    instruction: 'Resuelve la operación.',
+                    question: `${a} ${isAdd ? '+' : '-'} ${b} = ?`,
+                    visual: '',
+                    correctAnswer: isAdd ? a + b : a - b,
+                    options: [isAdd ? a+b : a-b, isAdd ? a+b+1 : a-b-1, isAdd ? a+b-1 : a-b+1, isAdd ? a+b+2 : a-b-2]
+                        .filter(x => x >= 0).sort(() => Math.random() - 0.5)
+                        .map(n => ({ label: n.toString(), value: n, visual: `<div style="font-size:28px;font-weight:800">${n}</div>` }))
+                };
             },
-            'muldiv': (d) => {
-                const max = d <= 3 ? 5 : 10;
+
+            // Multiplicación y división (8-9 años)
+            muldiv: (difficulty) => {
+                const max = Math.min(difficulty * 2, 12);
+                const isMul = Math.random() > 0.4;
                 const a = Math.floor(Math.random() * max) + 2;
                 const b = Math.floor(Math.random() * max) + 2;
-                return { q: `${a} × ${b} = ?`, visual: '', ans: a*b, opts: [a*b, a*b-1, a*b+2, a*b-3].filter(x=>x>0) };
-            },
-            'fractions': (d) => {
-                const num = Math.floor(Math.random()*3)+1;
-                const den = num + Math.floor(Math.random()*3)+2;
-                return { q: `¿Qué fracción representa ${num} de ${den} partes?`, visual: `🟨🟨🟦`.repeat(num) + '🟦'.repeat(den-num), ans: `${num}/${den}`, opts: [`${num}/${den}`, `${num+1}/${den}`, `${num}/${den-1}`, `${den}/${num}`] };
-            },
-            'algebra': (d) => {
-                const x = Math.floor(Math.random()*10)+1;
-                const c = Math.floor(Math.random()*20)+5;
-                return { q: `Si 2x + ${c} = ${2*x+c}, ¿cuánto vale x?`, visual: '', ans: x, opts: [x, x-1, x+2, Math.floor((2*x+c)/2)] };
-            },
-            // Fallback genérico para otros tipos
-            default: (d) => {
-                const ops = ['+','-','×','÷'];
-                const op = ops[Math.floor(Math.random()*4)];
-                const a = Math.floor(Math.random()*12)+2;
-                const b = Math.floor(Math.random()*10)+2;
-                let ans;
-                switch(op){
-                    case '+': ans=a+b; break;
-                    case '-': ans=Math.abs(a-b); break;
-                    case '×': ans=a*b; break;
-                    case '÷': ans=b; break; // a/b simplificado
+                
+                if (isMul) {
+                    return {
+                        type: 'muldiv',
+                        instruction: 'Resuelve la multiplicación.',
+                        question: `${a} × ${b} = ?`,
+                        visual: '',
+                        correctAnswer: a * b,
+                        options: [a*b, a*b-1, a*b+2, a*b-3].filter(x => x > 0).sort(() => Math.random() - 0.5)
+                            .map(n => ({ label: n.toString(), value: n, visual: `<div style="font-size:28px;font-weight:800">${n}</div>` }))
+                    };
+                } else {
+                    const ans = Math.floor(Math.random() * (max - 2)) + 2;
+                    const dividend = a * ans;
+                    return {
+                        type: 'muldiv',
+                        instruction: 'Resuelve la división.',
+                        question: `${dividend} ÷ ${a} = ?`,
+                        visual: '',
+                        correctAnswer: ans,
+                        options: [ans, ans-1, ans+2, ans+1].filter(x => x > 0).sort(() => Math.random() - 0.5)
+                            .map(n => ({ label: n.toString(), value: n, visual: `<div style="font-size:28px;font-weight:800">${n}</div>` }))
+                    };
                 }
-                return { q: `${a} ${op} ${b} = ?`, visual: '', ans, opts: [ans, ans-1, ans+2, ans+5] };
             }
         };
 
         // ==========================================
-        // 4. COMPONENTES PRINCIPALES
+        // COMPONENTES PRINCIPALES
         // ==========================================
-        function SoundEngine() {
-            const ctx = useRef(null);
-            const play = (type) => {
-                if(!ctx.current) ctx.current = new (window.AudioContext || window.webkitAudioContext)();
-                const c = ctx.current, o = c.createOscillator(), g = c.createGain();
-                o.connect(g); g.connect(c.destination);
-                const now = c.currentTime;
-                if(type==='correct') { o.frequency.setValueAtTime(523.25, now); o.frequency.setValueAtTime(783.99, now+0.1); g.gain.setValueAtTime(0.2,now); g.gain.exponentialRampToValueAtTime(0.01,now+0.2); o.start(now); o.stop(now+0.2); }
-                else if(type==='wrong') { o.type='sawtooth'; o.frequency.setValueAtTime(200,now); g.gain.setValueAtTime(0.15,now); g.gain.exponentialRampToValueAtTime(0.01,now+0.2); o.start(now); o.stop(now+0.2); }
-                else if(type==='click') { o.frequency.setValueAtTime(800,now); g.gain.setValueAtTime(0.1,now); g.gain.exponentialRampToValueAtTime(0.01,now+0.1); o.start(now); o.stop(now+0.1); }
-            };
-            return { play };
-        }
-
         function App() {
             const [user, setUser] = useState(null);
             const [screen, setScreen] = useState('login');
             const [ageGroup, setAgeGroup] = useState(null);
-            const [stats, setStats] = useState({ xp:0, coins:0, level:1, accuracy:0, streak:0, history:[], typeStats:{} });
+            const [stats, setStats] = useState({ xp: 0, stars: 0, level: 1, completedWorlds: [] });
+            const [unlockedWorlds, setUnlockedWorlds] = useState([]);
+            const [currentExercise, setCurrentExercise] = useState(null);
             const [difficulty, setDifficulty] = useState(1);
-            const [theme, setTheme] = useState('');
-            const sound = useRef(SoundEngine()).current;
 
-            // Cargar datos
             useEffect(() => {
-                const saved = localStorage.getItem('mq_data');
-                if(saved) {
+                const saved = localStorage.getItem('mq_smartick_data');
+                if (saved) {
                     const d = JSON.parse(saved);
-                    if(d.user) { setUser(d.user); setAgeGroup(d.ageGroup); setTheme(AGE_CONFIG[d.ageGroup]?.themeClass || ''); setStats(d.stats); setDifficulty(d.difficulty || 1); }
+                    setUser(d.user);
+                    setAgeGroup(d.ageGroup);
+                    setStats(d.stats);
+                    setUnlockedWorlds(d.unlockedWorlds || []);
+                    setDifficulty(d.difficulty || 1);
                 }
             }, []);
 
-            // Guardar
-            useEffect(() => { if(user) localStorage.setItem('mq_data', JSON.stringify({ user, ageGroup, stats, difficulty })); }, [user, ageGroup, stats, difficulty]);
+            useEffect(() => {
+                if (user) {
+                    localStorage.setItem('mq_smartick_data', JSON.stringify({
+                        user, ageGroup, stats, unlockedWorlds, difficulty
+                    }));
+                }
+            }, [user, ageGroup, stats, unlockedWorlds, difficulty]);
 
             const handleLogin = (name, age) => {
-                sound.play('click');
                 let group = age <= 5 ? '4-5' : age <= 7 ? '6-7' : age <= 9 ? '8-9' : age <= 12 ? '10-12' : '13-14';
+                const config = AGE_CONFIG[group];
+                
                 setUser({ name, age, group });
                 setAgeGroup(group);
-                setTheme(AGE_CONFIG[group].themeClass);
-                setScreen('dashboard');
+                setUnlockedWorlds(config.worlds.slice(0, 2)); // Desbloquear primeros 2 mundos
+                setScreen('world');
             };
 
-            const finishSession = (correct, total, time, type) => {
-                const acc = correct/total;
-                sound.play(acc >= 0.7 ? 'correct' : 'wrong');
-                const cfg = AGE_CONFIG[ageGroup];
-                const xpGain = Math.round(correct * 10 * cfg.rewards.xpMult);
-                const coinsGain = Math.round(correct * 3);
-                const newDiff = AdaptiveEngine.track(stats.history, difficulty, acc, time/correct);
-                setDifficulty(newDiff);
+            const unlockWorld = (worldId) => {
+                if (!unlockedWorlds.includes(worldId)) {
+                    setUnlockedWorlds([...unlockedWorlds, worldId]);
+                }
+            };
+
+            const startExercise = (worldId) => {
+                const config = AGE_CONFIG[ageGroup];
+                const exerciseType = config.exercises[Math.floor(Math.random() * config.exercises.length)];
+                const generator = ExerciseGenerator[exerciseType];
+                const exercise = generator ? generator(difficulty) : ExerciseGenerator.counting(difficulty);
+                setCurrentExercise(exercise);
+                setScreen('exercise');
+            };
+
+            const completeExercise = (correct, total) => {
+                const xpGain = correct * 10;
+                const starsGain = correct >= total * 0.8 ? 1 : 0;
+                
                 setStats(s => ({
                     ...s,
                     xp: s.xp + xpGain,
-                    coins: s.coins + coinsGain,
-                    level: Math.floor((s.xp + xpGain) / 100) + 1,
-                    accuracy: s.history.length === 0 ? acc : (s.accuracy * s.history.length + acc) / (s.history.length + 1),
-                    streak: acc >= 0.8 ? s.streak + 1 : 0,
-                    history: [...s.history.slice(-9), { correct: acc >= 0.8, time }],
-                    typeStats: { ...s.typeStats, [type]: { correct: (s.typeStats[type]?.correct||0)+correct, total: (s.typeStats[type]?.total||0)+total } }
+                    stars: s.stars + starsGain,
+                    level: Math.floor((s.xp + xpGain) / 100) + 1
                 }));
-                setScreen('dashboard');
+                
+                if (correct === total) {
+                    setDifficulty(d => Math.min(AGE_CONFIG[ageGroup].maxDifficulty, d + 1));
+                }
+                
+                setScreen('world');
             };
 
             return (
-                <div className={theme}>
+                <div>
                     {screen === 'login' && <LoginScreen onStart={handleLogin} />}
-                    {screen === 'dashboard' && <Dashboard user={user} ageGroup={ageGroup} stats={stats} onPlay={() => setScreen('game')} onTheme={theme} onLogout={() => {localStorage.removeItem('mq_data'); setUser(null); setScreen('login');}} />}
-                    {screen === 'game' && <GameSession ageGroup={ageGroup} difficulty={difficulty} stats={stats} onFinish={finishSession} sound={sound} />}
+                    {screen === 'world' && (
+                        <WorldMap 
+                            user={user} 
+                            ageGroup={ageGroup} 
+                            stats={stats} 
+                            unlockedWorlds={unlockedWorlds}
+                            onStartExercise={startExercise}
+                            onLogout={() => { localStorage.removeItem('mq_smartick_data'); setUser(null); setScreen('login'); }}
+                        />
+                    )}
+                    {screen === 'exercise' && currentExercise && (
+                        <ExerciseScreen 
+                            exercise={currentExercise} 
+                            ageGroup={ageGroup}
+                            onComplete={completeExercise}
+                            onBack={() => setScreen('world')}
+                        />
+                    )}
                 </div>
             );
         }
@@ -282,146 +559,284 @@
         function LoginScreen({ onStart }) {
             const [name, setName] = useState('');
             const [age, setAge] = useState('');
+
             return (
-                <div style={{minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'linear-gradient(135deg, #667eea, #764ba2)', padding:20}}>
-                    <div className="card" style={{maxWidth:400, width:'100%', textAlign:'center'}}>
-                        <div className="float" style={{fontSize:64, marginBottom:10}}>🎓</div>
-                        <h1 style={{fontSize:32, fontWeight:900, marginBottom:8}}>MathQuest</h1>
-                        <p style={{color:'#64748b', marginBottom:20}}>Aprende matemáticas adaptadas a tu edad</p>
-                        <input placeholder="Tu nombre" value={name} onChange={e=>setName(e.target.value)} style={{width:'100%', padding:'14px', borderRadius:12, border:'2px solid #e2e8f0', fontSize:16, fontFamily:'Nunito', marginBottom:12}} />
-                        <input type="number" placeholder="Tu edad (4-14)" value={age} onChange={e=>setAge(e.target.value)} min="4" max="14" style={{width:'100%', padding:'14px', borderRadius:12, border:'2px solid #e2e8f0', fontSize:16, fontFamily:'Nunito', marginBottom:16}} />
-                        <button onClick={()=> name && age>=4 && age<=14 && onStart(name, parseInt(age))} className="btn btn-primary" style={{width:'100%', fontSize:18, opacity: name&&age>=4&&age<=14?1:0.5}}>
-                            🚀 ¡Empezar aventura!
+                <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: 20 }}>
+                    <div className="card pop" style={{ background: 'white', borderRadius: 32, padding: 40, maxWidth: 450, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+                        <div className="float" style={{ fontSize: 80, textAlign: 'center', marginBottom: 16 }}>🎓</div>
+                        <h1 style={{ fontSize: 36, fontWeight: 900, textAlign: 'center', marginBottom: 8, color: '#2C3E50' }}>MathQuest</h1>
+                        <p style={{ textAlign: 'center', color: '#7F8C8D', marginBottom: 32, fontSize: 16 }}>Aprende jugando como en Smartick</p>
+                        
+                        <input 
+                            placeholder="Tu nombre" 
+                            value={name} 
+                            onChange={e => setName(e.target.value)} 
+                            style={{ width: '100%', padding: '16px 20px', borderRadius: 16, border: '3px solid #E0E0E0', fontSize: 18, fontFamily: 'Nunito', marginBottom: 16, transition: 'border-color 0.3s' }}
+                            onFocus={e => e.target.style.borderColor = '#3498DB'}
+                            onBlur={e => e.target.style.borderColor = '#E0E0E0'}
+                        />
+                        
+                        <input 
+                            type="number" 
+                            placeholder="Tu edad (4-14)" 
+                            value={age} 
+                            onChange={e => setAge(e.target.value)} 
+                            min="4" 
+                            max="14" 
+                            style={{ width: '100%', padding: '16px 20px', borderRadius: 16, border: '3px solid #E0E0E0', fontSize: 18, fontFamily: 'Nunito', marginBottom: 24 }}
+                        />
+                        
+                        <button 
+                            onClick={() => name && age >= 4 && age <= 14 && onStart(name, parseInt(age))} 
+                            className="btn-primary"
+                            style={{ 
+                                width: '100%', 
+                                padding: '18px', 
+                                fontSize: 20, 
+                                fontWeight: 800, 
+                                background: 'linear-gradient(135deg, #667eea, #764ba2)', 
+                                color: 'white', 
+                                border: 'none', 
+                                borderRadius: 16, 
+                                cursor: 'pointer',
+                                opacity: name && age >= 4 && age <= 14 ? 1 : 0.5,
+                                boxShadow: '0 8px 24px rgba(102,126,234,0.4)',
+                                transition: 'all 0.3s'
+                            }}>
+                            🚀 ¡Comenzar Aventura!
                         </button>
                     </div>
                 </div>
             );
         }
 
-        function Dashboard({ user, ageGroup, stats, onPlay, theme, onLogout }) {
-            const cfg = AGE_CONFIG[ageGroup];
+        function WorldMap({ user, ageGroup, stats, unlockedWorlds, onStartExercise, onLogout }) {
+            const config = AGE_CONFIG[ageGroup];
+            
+            const worlds = [
+                { id: 'numeros', name: 'Números', icon: '🔢', color: '#FF6B6B' },
+                { id: 'colores', name: 'Colores', icon: '🎨', color: '#4ECDC4' },
+                { id: 'formas', name: 'Formas', icon: '🔷', color: '#FFE66D' },
+                { id: 'sumas', name: 'Sumas', icon: '➕', color: '#95E1D3' },
+                { id: 'restas', name: 'Restas', icon: '➖', color: '#F38181' },
+                { id: 'multiplicacion', name: 'Multiplicar', icon: '✖️', color: '#AA96DA' }
+            ];
+
             return (
-                <div style={{maxWidth:800, margin:'0 auto', padding:'20px 16px 60px'}}>
-                    <header style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24}}>
+                <div className="world-bg" style={{ minHeight: '100vh', paddingBottom: 100 }}>
+                    {/* Header */}
+                    <header style={{ 
+                        background: 'rgba(255,255,255,0.9)', 
+                        padding: '16px 24px', 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 10
+                    }}>
                         <div>
-                            <h1 style={{fontSize:28, fontWeight:900}}>¡Hola, {user.name}! 👋</h1>
-                            <span style={{background:cfg.colors.primary, color:'#fff', padding:'4px 12px', borderRadius:20, fontSize:12, fontWeight:700}}>{cfg.label} ({ageGroup})</span>
+                            <h1 style={{ fontSize: 24, fontWeight: 900, color: '#2C3E50' }}>¡Hola, {user.name}! 👋</h1>
+                            <span style={{ background: config.colors?.primary || '#3498DB', color: 'white', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
+                                {config.label} ({ageGroup} años)
+                            </span>
                         </div>
-                        <div style={{display:'flex', gap:12, alignItems:'center'}}>
-                            <span style={{fontWeight:800}}>{cfg.rewards.icon} {stats.coins}</span>
-                            <button onClick={onLogout} className="btn btn-outline" style={{padding:'8px 12px'}}>🚪</button>
+                        
+                        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                            <div className="xp-badge">
+                                <span>⭐</span>
+                                <span>{stats.stars}</span>
+                            </div>
+                            <div className="xp-badge" style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}>
+                                <span>🏆</span>
+                                <span>{stats.xp} XP</span>
+                            </div>
+                            <button onClick={onLogout} style={{ background: '#E74C3C', color: 'white', border: 'none', borderRadius: 12, padding: '8px 16px', cursor: 'pointer', fontWeight: 700 }}>🚪</button>
                         </div>
                     </header>
 
-                    <div className="card" style={{background:`linear-gradient(135deg, ${cfg.colors.primary}, ${cfg.colors.secondary})`, color:'#fff', marginBottom:20}}>
-                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                            <div>
-                                <div style={{fontSize:14, opacity:0.9}}>Nivel {stats.level}</div>
-                                <div style={{fontSize:32, fontWeight:900}}>{stats.xp} XP</div>
-                            </div>
-                            <div style={{width:80, height:80, borderRadius:'50%', background:'rgba(255,255,255,0.2)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:40}}>🏅</div>
+                    {/* Progress Bar */}
+                    <div style={{ maxWidth: 600, margin: '24px auto', padding: '0 20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontWeight: 700, color: '#2C3E50' }}>
+                            <span>Nivel {stats.level}</span>
+                            <span>{stats.xp % 100}/100 XP</span>
                         </div>
-                        <div style={{marginTop:12, background:'rgba(255,255,255,0.3)', height:8, borderRadius:4}}>
-                            <div style={{width:`${(stats.xp % 100)}%`, height:'100%', background:'#fff', borderRadius:4, transition:'width 0.5s'}}></div>
+                        <div className="progress-bar">
+                            <div className="progress-fill" style={{ width: `${stats.xp % 100}%` }}></div>
                         </div>
                     </div>
 
-                    <button onClick={onPlay} className="btn btn-primary" style={{width:'100%', padding:'18px', fontSize:20, marginBottom:20, boxShadow:`0 8px 24px ${cfg.colors.primary}50`}}>
-                        🎮 Jugar Ahora
-                    </button>
-
-                    <h3 style={{fontSize:18, fontWeight:800, marginBottom:12}}>📊 Tu Progreso</h3>
-                    <div className="grid-2" style={{marginBottom:20}}>
-                        <div className="card" style={{textAlign:'center'}}>
-                            <div style={{fontSize:24}}>🎯</div>
-                            <div style={{fontSize:20, fontWeight:800}}>{stats.accuracy > 0 ? `${Math.round(stats.accuracy*100)}%` : '-'}</div>
-                            <div style={{fontSize:12, color:'#64748b'}}>Precisión</div>
-                        </div>
-                        <div className="card" style={{textAlign:'center'}}>
-                            <div style={{fontSize:24}}>🔥</div>
-                            <div style={{fontSize:20, fontWeight:800}}>{stats.streak}</div>
-                            <div style={{fontSize:12, color:'#64748b'}}>Racha actual</div>
+                    {/* Worlds Grid */}
+                    <div style={{ 
+                        maxWidth: 900, 
+                        margin: '40px auto', 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        alignItems: 'center', 
+                        gap: 32,
+                        padding: '0 20px'
+                    }}>
+                        <h2 style={{ fontSize: 28, fontWeight: 900, color: '#2C3E50', textShadow: '2px 2px 4px rgba(255,255,255,0.8)' }}>
+                            🌍 Mundos de Aprendizaje
+                        </h2>
+                        
+                        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 32 }}>
+                            {worlds.map((world, index) => {
+                                const isUnlocked = unlockedWorlds.includes(world.id);
+                                const isNext = !isUnlocked && unlockedWorlds.length === index;
+                                
+                                return (
+                                    <div 
+                                        key={world.id}
+                                        className={`bubble ${!isUnlocked ? 'locked' : ''} ${isUnlocked ? 'float' : ''}`}
+                                        style={{ 
+                                            animationDelay: `${index * 0.2}s`,
+                                            background: isUnlocked ? `radial-gradient(circle at 30% 30%, ${world.color}40, ${world.color}10)` : undefined
+                                        }}
+                                        onClick={() => isUnlocked && onStartExercise(world.id)}
+                                    >
+                                        <div className="bubble-icon">{world.icon}</div>
+                                        <div className="bubble-label">{world.name}</div>
+                                        {!isUnlocked && (
+                                            <div className="lock-overlay">🔒</div>
+                                        )}
+                                        {isUnlocked && (
+                                            <div style={{ position: 'absolute', top: -10, right: -10, background: '#2ECC71', color: 'white', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>✓</div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
-                    <h3 style={{fontSize:18, fontWeight:800, marginBottom:12}}>🧩 Juegos Disponibles</h3>
-                    <div className="grid-4">
-                        {cfg.games.map(g => (
-                            <div key={g} className="card" style={{textAlign:'center', cursor:'pointer', border:`2px solid ${cfg.colors.primary}20`}} onClick={onPlay}>
-                                <div style={{fontSize:32, marginBottom:6}}>{g==='counting'?'🔢':g==='shapes'?'🔺':g==='colors'?'🎨':g==='addsub'?'➕':g==='muldiv'?'✖️':g==='fractions'?'🥧':g==='algebra'?'🧮':'📝'}</div>
-                                <div style={{fontWeight:700, fontSize:14}}>{g.charAt(0).toUpperCase()+g.slice(1)}</div>
-                            </div>
-                        ))}
+                    {/* Character */}
+                    <div className="character" style={{ fontSize: 100 }}>
+                        {config.character}
+                    </div>
+
+                    {/* Daily Challenge */}
+                    <div style={{ 
+                        position: 'fixed', 
+                        bottom: 20, 
+                        left: '50%', 
+                        transform: 'translateX(-50%)',
+                        background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+                        padding: '16px 32px',
+                        borderRadius: 24,
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+                        cursor: 'pointer',
+                        fontWeight: 800,
+                        fontSize: 16,
+                        color: '#2C3E50',
+                        zIndex: 100
+                    }} className="pulse">
+                        🎯 Reto Diario: Completa 3 ejercicios
                     </div>
                 </div>
             );
         }
 
-        function GameSession({ ageGroup, difficulty, stats, onFinish, sound }) {
-            const cfg = AGE_CONFIG[ageGroup];
-            const [current, setCurrent] = useState(null);
-            const [session, setSession] = useState({ correct:0, total:0, start:Date.now(), type:cfg.games[0] });
+        function ExerciseScreen({ exercise, ageGroup, onComplete, onBack }) {
             const [selected, setSelected] = useState(null);
             const [feedback, setFeedback] = useState(null);
-            const [time, setTime] = useState(0);
-            const timer = useRef();
+            const [questionNum, setQuestionNum] = useState(1);
+            const [correctCount, setCorrectCount] = useState(0);
+            const totalQuestions = 10;
 
-            useEffect(() => {
-                generate();
-                timer.current = setInterval(() => setTime(t => t+1), 1000);
-                return () => clearInterval(timer.current);
-            }, []);
-
-            const generate = () => {
-                const type = cfg.games[Math.floor(Math.random()*cfg.games.length)];
-                const qGen = QuestionGenerator[type] || QuestionGenerator.default;
-                setCurrent({ ...qGen(difficulty), type });
-            };
-
-            const handleAnswer = (val) => {
-                if(feedback) return;
-                setSelected(val);
-                const isCorrect = String(val) === String(current.ans);
-                sound.play(isCorrect ? 'correct' : 'wrong');
-                setFeedback(isCorrect ? '🎉 ¡Correcto!' : '💪 ¡Casi!');
-                setSession(s => ({ ...s, correct: s.correct + (isCorrect?1:0), total: s.total+1 }));
+            const handleSelect = (value) => {
+                if (feedback) return;
+                setSelected(value);
+                const isCorrect = String(value) === String(exercise.correctAnswer);
+                setFeedback(isCorrect ? 'correct' : 'wrong');
+                
+                if (isCorrect) {
+                    setCorrectCount(c => c + 1);
+                }
+                
                 setTimeout(() => {
-                    if(session.total + 1 >= 10) {
-                        clearInterval(timer.current);
-                        onFinish(session.correct + (isCorrect?1:0), session.total + 1, time, session.type);
+                    if (questionNum >= totalQuestions) {
+                        onComplete(correctCount + (isCorrect ? 1 : 0), totalQuestions);
                     } else {
-                        setFeedback(null); setSelected(null); generate();
+                        setQuestionNum(q => q + 1);
+                        setSelected(null);
+                        setFeedback(null);
+                        // Generate new exercise of same type
+                        const generator = ExerciseGenerator[exercise.type];
+                        if (generator) {
+                            // In real app, would fetch new exercise from server
+                        }
                     }
-                }, 1000);
+                }, 1500);
             };
 
             return (
-                <div style={{maxWidth:600, margin:'0 auto', padding:20, textAlign:'center'}}>
-                    <div style={{display:'flex', justifyContent:'space-between', marginBottom:20}}>
-                        <button className="btn btn-outline" style={{padding:'8px 12px'}} onClick={()=>onFinish(session.correct, session.total, time, session.type)}>✕ Salir</button>
-                        <div style={{fontWeight:800}}>⏱️ {Math.floor(time/60)}:{(time%60).toString().padStart(2,'0')}</div>
+                <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #E0F6FF 0%, #98D8C8 100%)', padding: 20 }}>
+                    {/* Header */}
+                    <div style={{ 
+                        maxWidth: 800, 
+                        margin: '0 auto', 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        marginBottom: 24
+                    }}>
+                        <button onClick={onBack} style={{ background: 'white', border: 'none', borderRadius: 12, padding: '12px 20px', cursor: 'pointer', fontWeight: 700, fontSize: 16, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                            ← Volver
+                        </button>
+                        <div style={{ background: 'white', padding: '8px 20px', borderRadius: 20, fontWeight: 800, fontSize: 18 }}>
+                            {questionNum} / {totalQuestions}
+                        </div>
                     </div>
 
-                    <div className="card pop" style={{minHeight:200, display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', background:'#fff', marginBottom:20}}>
-                        <div style={{fontSize:14, color:cfg.colors.primary, fontWeight:700, marginBottom:8, textTransform:'uppercase'}}>{current?.type}</div>
-                        <div style={{fontSize:24, fontWeight:800, marginBottom:12, whiteSpace:'pre-wrap'}}>{current?.q}</div>
-                        <div dangerouslySetInnerHTML={{__html: current?.visual || ''}} style={{marginBottom:12, fontSize: ageGroup==='4-5'?'32px':'20px'}} />
-                    </div>
+                    {/* Exercise Content */}
+                    <div className="card pop" style={{ maxWidth: 800, margin: '0 auto', background: 'white', borderRadius: 32, padding: 40, boxShadow: '0 12px 40px rgba(0,0,0,0.15)' }}>
+                        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                            <div style={{ fontSize: 18, color: '#7F8C8D', marginBottom: 8 }}>{exercise.instruction}</div>
+                            <h2 style={{ fontSize: 32, fontWeight: 900, color: '#2C3E50', marginBottom: 24 }}>{exercise.question}</h2>
+                            <div dangerouslySetInnerHTML={{ __html: exercise.visual }} style={{ marginBottom: 32 }} />
+                        </div>
 
-                    <div className="grid-2" style={{marginBottom:16}}>
-                        {current?.opts.map((opt, i) => (
-                            <button key={i} className="btn" style={{
-                                padding: ageGroup==='4-5'?'24px':'16px', fontSize: ageGroup==='4-5'?'22px':'18px',
-                                background: selected===opt ? (feedback?.includes('🎉')?'#dcfce7':'#fef2f2') : '#fff',
-                                border: `3px solid ${selected===opt ? (feedback?.includes('🎉')?'#22c55e':'#ef4444') : '#e2e8f0'}`,
-                                color: selected===opt ? (feedback?.includes('🎉')?'#166534':'#991b1b') : '#1e293b',
-                                transform: selected===opt ? 'scale(0.95)' : '1'
-                            }} onClick={()=>handleAnswer(opt)} disabled={!!feedback}>
-                                {opt}
-                            </button>
-                        ))}
+                        {/* Options */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 500, margin: '0 auto' }}>
+                            {exercise.options.map((opt, idx) => {
+                                const isSelected = selected === opt.value;
+                                const isWrong = feedback === 'wrong' && isSelected;
+                                const isCorrect = feedback === 'correct' && isSelected;
+                                
+                                return (
+                                    <div 
+                                        key={idx}
+                                        className={`tag-option ${isSelected ? 'selected' : ''} ${isWrong ? 'wrong' : ''}`}
+                                        onClick={() => handleSelect(opt.value)}
+                                        style={{
+                                            borderColor: isCorrect ? '#2ECC71' : isWrong ? '#E74C3C' : '#E0E0E0',
+                                            background: isCorrect ? '#E8F8F0' : isWrong ? '#FDEDEC' : 'white',
+                                            cursor: feedback ? 'not-allowed' : 'pointer',
+                                            opacity: feedback && !isSelected ? 0.5 : 1
+                                        }}
+                                        dangerouslySetInnerHTML={{ __html: opt.visual || opt.label }}
+                                    />
+                                );
+                            })}
+                        </div>
+
+                        {/* Feedback */}
+                        {feedback && (
+                            <div className={`pop ${feedback === 'wrong' ? 'shake' : ''}`} style={{ 
+                                textAlign: 'center', 
+                                marginTop: 24, 
+                                padding: '16px 32px', 
+                                borderRadius: 16, 
+                                background: feedback === 'correct' ? '#2ECC71' : '#E74C3C', 
+                                color: 'white', 
+                                fontSize: 24, 
+                                fontWeight: 800 
+                            }}>
+                                {feedback === 'correct' ? '🎉 ¡Excelente!' : '💪 ¡Sigue intentando!'}
+                            </div>
+                        )}
                     </div>
-                    {feedback && <div className={`pop ${feedback.includes('💪')?'shake':''}`} style={{padding:12, borderRadius:12, background:feedback.includes('🎉')?'#dcfce7':'#fef2f2', fontWeight:700, fontSize:16}}>{feedback}</div>}
                 </div>
             );
         }
