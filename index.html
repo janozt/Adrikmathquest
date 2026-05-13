@@ -96,8 +96,11 @@
             transition: all 0.3s;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 12px;
             min-width: 180px;
+            font-weight: 700;
+            font-size: 18px;
         }
         
         .tag-option:hover {
@@ -124,6 +127,7 @@
             position: relative;
             cursor: pointer;
             transition: transform 0.3s;
+            display: inline-block;
         }
         
         .gumball-machine:hover {
@@ -210,6 +214,25 @@
             transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 17px;
         }
+
+        .objects-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            padding: 30px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 20px;
+            margin: 20px 0;
+            min-height: 120px;
+            align-items: center;
+        }
+
+        .counting-object {
+            font-size: 48px;
+            animation: pop 0.5s ease-out;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+        }
     </style>
 </head>
 <body>
@@ -218,9 +241,6 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // ==========================================
-        // CONFIGURACIÓN POR EDADES - SMARTICK STYLE
-        // ==========================================
         const AGE_CONFIG = {
             '4-5': {
                 label: 'Preescolar',
@@ -228,7 +248,7 @@
                 lockedWorlds: ['sumas', 'restas'],
                 exercises: ['counting', 'colors', 'shapes', 'matching', 'full-empty', 'habitats'],
                 maxDifficulty: 3,
-                character: '',
+                character: '🐻',
                 bgColor: '#FFE5B4'
             },
             '6-7': {
@@ -270,101 +290,88 @@
         };
 
         // ==========================================
-        // GENERADORES DE EJERCICIOS TIPO SMARTICK
+        // GENERADORES DE EJERCICIOS CORREGIDOS
         // ==========================================
         const ExerciseGenerator = {
-            // Ejercicio de colores (como imagen 2)
+            // Ejercicio de conteo CORREGIDO
+            counting: (difficulty) => {
+                const max = Math.max(2, difficulty * 3);
+                const count = Math.floor(Math.random() * max) + 1;
+                const items = ['🍎', '', '🎈', '🍊', '', ''];
+                const item = items[Math.floor(Math.random() * items.length)];
+                
+                // Crear visualización CORREGIDA
+                const visualContent = Array(count).fill(item).join(' ');
+                
+                return {
+                    type: 'counting',
+                    instruction: 'Cuenta los objetos.',
+                    question: '¿Cuántos hay?',
+                    items: items,
+                    count: count,
+                    selectedItem: item,
+                    correctAnswer: count,
+                    options: [count-1, count, count+1, count+2].filter(x => x > 0).sort(() => Math.random() - 0.5)
+                        .map(n => ({ label: n.toString(), value: n }))
+                };
+            },
+
+            // Ejercicio de colores
             colors: (difficulty) => {
                 const colors = [
-                    { name: 'Verde', hex: '#2ECC71', icon: '🟢', basket: '🧺' },
-                    { name: 'Rojo', hex: '#E74C3C', icon: '🔴', basket: '🧺' },
-                    { name: 'Azul', hex: '#3498DB', icon: '🔵', basket: '🧺' },
-                    { name: 'Amarillo', hex: '#F1C40F', icon: '🟡', basket: '🧺' }
+                    { name: 'Verde', hex: '#2ECC71', icon: '🟢' },
+                    { name: 'Rojo', hex: '#E74C3C', icon: '🔴' },
+                    { name: 'Azul', hex: '#3498DB', icon: '🔵' },
+                    { name: 'Amarillo', hex: '#F1C40F', icon: '🟡' }
                 ];
                 const target = colors[Math.floor(Math.random() * colors.length)];
-                const items = ['🍎', '🍐', '🍊', '🫐', '', ''];
+                const items = ['🍎', '', '🍊', '🫐'];
                 const item = items[Math.floor(Math.random() * items.length)];
                 
                 return {
                     type: 'colors',
                     instruction: 'Marca las etiquetas correctas.',
                     question: `¿De qué color es esta ${item}?`,
-                    visual: `<div style="font-size:80px">${item}</div>`,
                     correctAnswer: target.name,
                     options: colors.map(c => ({
                         label: c.name,
-                        visual: `<div style="display:flex;align-items:center;gap:8px"><span style="font-size:32px">${c.basket}</span><div style="width:32px;height:32px;background:${c.hex};border-radius:50%"></div></div>`,
-                        value: c.name
+                        value: c.name,
+                        color: c.hex
                     }))
                 };
             },
 
-            // Ejercicio de lleno/vacío (como imagen 3)
+            // Ejercicio de lleno/vacío
             'full-empty': (difficulty) => {
-                const items = [
-                    { name: 'máquina de chicles', full: '🌈', empty: '' },
-                    { name: 'vaso', full: '💧', empty: '' },
-                    { name: 'canasta', full: '🍎', empty: '' },
-                    { name: 'frasco', full: '🍪', empty: '' }
-                ];
-                const item = items[Math.floor(Math.random() * items.length)];
                 const fullSide = Math.random() > 0.5 ? 'left' : 'right';
                 
                 return {
                     type: 'full-empty',
                     instruction: 'Responde la pregunta.',
                     question: '¿Cuál está llena?',
-                    visual: `
-                        <div style="display:flex;justify-content:center;gap:40px;margin:20px 0">
-                            <div class="gumball-machine" style="${fullSide === 'left' ? 'opacity:1' : 'opacity:0.5'}">
-                                <div class="gumball-globe">
-                                    ${fullSide === 'left' ? `
-                                        <div class="gumballs-filled">
-                                            ${Array(25).fill(0).map(() => `<div class="gumball" style="background:${['#FF6B6B','#4ECDC4','#FFE66D','#95E1D3'][Math.floor(Math.random()*4)]}"></div>`).join('')}
-                                        </div>
-                                    ` : ''}
-                                </div>
-                                <div style="width:80px;height:100px;background:linear-gradient(180deg,#E74C3C,#C0392B);margin:0 auto;border-radius:0 0 20px 20px;position:relative">
-                                    <div style="position:absolute;top:20px;left:50%;transform:translateX(-50%);width:40px;height:50px;background:#95A5A6;border-radius:8px"></div>
-                                </div>
-                            </div>
-                            <div class="gumball-machine" style="${fullSide === 'right' ? 'opacity:1' : 'opacity:0.5'}">
-                                <div class="gumball-globe">
-                                    ${fullSide === 'right' ? `
-                                        <div class="gumballs-filled">
-                                            ${Array(25).fill(0).map(() => `<div class="gumball" style="background:${['#FF6B6B','#4ECDC4','#FFE66D','#95E1D3'][Math.floor(Math.random()*4)]}"></div>`).join('')}
-                                        </div>
-                                    ` : ''}
-                                </div>
-                                <div style="width:80px;height:100px;background:linear-gradient(180deg,#E74C3C,#C0392B);margin:0 auto;border-radius:0 0 20px 20px;position:relative">
-                                    <div style="position:absolute;top:20px;left:50%;transform:translateX(-50%);width:40px;height:50px;background:#95A5A6;border-radius:8px"></div>
-                                </div>
-                            </div>
-                        </div>
-                    `,
                     correctAnswer: fullSide,
                     options: [
-                        { label: 'Izquierda', value: 'left', visual: '⬅️' },
-                        { label: 'Derecha', value: 'right', visual: '➡️' }
+                        { label: 'Izquierda', value: 'left' },
+                        { label: 'Derecha', value: 'right' }
                     ]
                 };
             },
 
-            // Ejercicio de hábitats (como imágenes 4-5)
+            // Ejercicio de hábitats
             habitats: (difficulty) => {
                 const animals = [
-                    { name: 'elefante', icon: '🐘', habitat: 'Sabana', habitatIcon: '', wrong: ['Océano', 'Cielo'] },
-                    { name: 'tiburón', icon: '🦈', habitat: 'Océano', habitatIcon: '🌊', wrong: ['Sabana', 'Cielo'] },
-                    { name: 'águila', icon: '🦅', habitat: 'Cielo', habitatIcon: '☁️', wrong: ['Océano', 'Sabana'] },
-                    { name: 'oso', icon: '🐻', habitat: 'Bosque', habitatIcon: '🌲', wrong: ['Océano', 'Cielo'] },
-                    { name: 'pez', icon: '🐠', habitat: 'Océano', habitatIcon: '🌊', wrong: ['Sabana', 'Cielo'] }
+                    { name: 'elefante', icon: '🐘', habitat: 'Sabana', wrong: ['Océano', 'Cielo'] },
+                    { name: 'tiburón', icon: '🦈', habitat: 'Océano', wrong: ['Sabana', 'Cielo'] },
+                    { name: 'águila', icon: '🦅', habitat: 'Cielo', wrong: ['Océano', 'Sabana'] },
+                    { name: 'oso', icon: '🐻', habitat: 'Bosque', wrong: ['Océano', 'Cielo'] }
                 ];
                 const animal = animals[Math.floor(Math.random() * animals.length)];
+                
                 const allHabitats = [
-                    { name: 'Océano', icon: '🌊', color: '#3498DB' },
-                    { name: 'Sabana', icon: '🌍', color: '#F1C40F' },
-                    { name: 'Cielo', icon: '☁️', color: '#95A5A6' },
-                    { name: 'Bosque', icon: '🌲', color: '#27AE60' }
+                    { name: 'Océano', icon: '🌊' },
+                    { name: 'Sabana', icon: '🌍' },
+                    { name: 'Cielo', icon: '☁️' },
+                    { name: 'Bosque', icon: '🌲' }
                 ];
                 
                 const options = [
@@ -376,35 +383,16 @@
                     type: 'habitats',
                     instruction: 'Marca las etiquetas correctas.',
                     question: `¿Dónde vive el/la ${animal.name}?`,
-                    visual: `<div style="font-size:100px">${animal.icon}</div>`,
                     correctAnswer: animal.habitat,
                     options: options.map(h => ({
                         label: h.name,
-                        visual: `<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="font-size:40px">${h.icon}</div><div style="font-weight:700;font-size:14px">${h.name}</div></div>`,
-                        value: h.name
+                        value: h.name,
+                        icon: h.icon
                     }))
                 };
             },
 
-            // Conteo (para 4-5 años)
-            counting: (difficulty) => {
-                const max = difficulty * 3;
-                const count = Math.floor(Math.random() * max) + 1;
-                const items = ['🍎', '🌟', '🎈', '', '', ''];
-                const item = items[Math.floor(Math.random() * items.length)];
-                
-                return {
-                    type: 'counting',
-                    instruction: 'Cuenta los objetos.',
-                    question: '¿Cuántos hay?',
-                    visual: `<div style="font-size:40px;letter-spacing:8px">${Array(count).fill(item).join(' ')}</div>`,
-                    correctAnswer: count,
-                    options: [count-1, count, count+1, count+2].filter(x => x > 0).sort(() => Math.random() - 0.5)
-                        .map(n => ({ label: n.toString(), value: n, visual: `<div style="font-size:24px;font-weight:800">${n}</div>` }))
-                };
-            },
-
-            // Sumas y restas (6-7 años)
+            // Sumas y restas
             addsub: (difficulty) => {
                 const max = difficulty * 3;
                 const isAdd = Math.random() > 0.5;
@@ -415,15 +403,14 @@
                     type: 'addsub',
                     instruction: 'Resuelve la operación.',
                     question: `${a} ${isAdd ? '+' : '-'} ${b} = ?`,
-                    visual: '',
                     correctAnswer: isAdd ? a + b : a - b,
                     options: [isAdd ? a+b : a-b, isAdd ? a+b+1 : a-b-1, isAdd ? a+b-1 : a-b+1, isAdd ? a+b+2 : a-b-2]
                         .filter(x => x >= 0).sort(() => Math.random() - 0.5)
-                        .map(n => ({ label: n.toString(), value: n, visual: `<div style="font-size:28px;font-weight:800">${n}</div>` }))
+                        .map(n => ({ label: n.toString(), value: n }))
                 };
             },
 
-            // Multiplicación y división (8-9 años)
+            // Multiplicación y división
             muldiv: (difficulty) => {
                 const max = Math.min(difficulty * 2, 12);
                 const isMul = Math.random() > 0.4;
@@ -435,10 +422,9 @@
                         type: 'muldiv',
                         instruction: 'Resuelve la multiplicación.',
                         question: `${a} × ${b} = ?`,
-                        visual: '',
                         correctAnswer: a * b,
                         options: [a*b, a*b-1, a*b+2, a*b-3].filter(x => x > 0).sort(() => Math.random() - 0.5)
-                            .map(n => ({ label: n.toString(), value: n, visual: `<div style="font-size:28px;font-weight:800">${n}</div>` }))
+                            .map(n => ({ label: n.toString(), value: n }))
                     };
                 } else {
                     const ans = Math.floor(Math.random() * (max - 2)) + 2;
@@ -447,10 +433,9 @@
                         type: 'muldiv',
                         instruction: 'Resuelve la división.',
                         question: `${dividend} ÷ ${a} = ?`,
-                        visual: '',
                         correctAnswer: ans,
                         options: [ans, ans-1, ans+2, ans+1].filter(x => x > 0).sort(() => Math.random() - 0.5)
-                            .map(n => ({ label: n.toString(), value: n, visual: `<div style="font-size:28px;font-weight:800">${n}</div>` }))
+                            .map(n => ({ label: n.toString(), value: n }))
                     };
                 }
             }
@@ -494,14 +479,8 @@
                 
                 setUser({ name, age, group });
                 setAgeGroup(group);
-                setUnlockedWorlds(config.worlds.slice(0, 2)); // Desbloquear primeros 2 mundos
+                setUnlockedWorlds(config.worlds.slice(0, 2));
                 setScreen('world');
-            };
-
-            const unlockWorld = (worldId) => {
-                if (!unlockedWorlds.includes(worldId)) {
-                    setUnlockedWorlds([...unlockedWorlds, worldId]);
-                }
             };
 
             const startExercise = (worldId) => {
@@ -572,8 +551,6 @@
                             value={name} 
                             onChange={e => setName(e.target.value)} 
                             style={{ width: '100%', padding: '16px 20px', borderRadius: 16, border: '3px solid #E0E0E0', fontSize: 18, fontFamily: 'Nunito', marginBottom: 16, transition: 'border-color 0.3s' }}
-                            onFocus={e => e.target.style.borderColor = '#3498DB'}
-                            onBlur={e => e.target.style.borderColor = '#E0E0E0'}
                         />
                         
                         <input 
@@ -588,7 +565,6 @@
                         
                         <button 
                             onClick={() => name && age >= 4 && age <= 14 && onStart(name, parseInt(age))} 
-                            className="btn-primary"
                             style={{ 
                                 width: '100%', 
                                 padding: '18px', 
@@ -600,8 +576,7 @@
                                 borderRadius: 16, 
                                 cursor: 'pointer',
                                 opacity: name && age >= 4 && age <= 14 ? 1 : 0.5,
-                                boxShadow: '0 8px 24px rgba(102,126,234,0.4)',
-                                transition: 'all 0.3s'
+                                boxShadow: '0 8px 24px rgba(102,126,234,0.4)'
                             }}>
                             🚀 ¡Comenzar Aventura!
                         </button>
@@ -624,7 +599,6 @@
 
             return (
                 <div className="world-bg" style={{ minHeight: '100vh', paddingBottom: 100 }}>
-                    {/* Header */}
                     <header style={{ 
                         background: 'rgba(255,255,255,0.9)', 
                         padding: '16px 24px', 
@@ -638,7 +612,7 @@
                     }}>
                         <div>
                             <h1 style={{ fontSize: 24, fontWeight: 900, color: '#2C3E50' }}>¡Hola, {user.name}! 👋</h1>
-                            <span style={{ background: config.colors?.primary || '#3498DB', color: 'white', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
+                            <span style={{ background: '#3498DB', color: 'white', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
                                 {config.label} ({ageGroup} años)
                             </span>
                         </div>
@@ -656,7 +630,6 @@
                         </div>
                     </header>
 
-                    {/* Progress Bar */}
                     <div style={{ maxWidth: 600, margin: '24px auto', padding: '0 20px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontWeight: 700, color: '#2C3E50' }}>
                             <span>Nivel {stats.level}</span>
@@ -667,7 +640,6 @@
                         </div>
                     </div>
 
-                    {/* Worlds Grid */}
                     <div style={{ 
                         maxWidth: 900, 
                         margin: '40px auto', 
@@ -684,7 +656,6 @@
                         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 32 }}>
                             {worlds.map((world, index) => {
                                 const isUnlocked = unlockedWorlds.includes(world.id);
-                                const isNext = !isUnlocked && unlockedWorlds.length === index;
                                 
                                 return (
                                     <div 
@@ -701,21 +672,14 @@
                                         {!isUnlocked && (
                                             <div className="lock-overlay">🔒</div>
                                         )}
-                                        {isUnlocked && (
-                                            <div style={{ position: 'absolute', top: -10, right: -10, background: '#2ECC71', color: 'white', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14 }}>✓</div>
-                                        )}
                                     </div>
                                 );
                             })}
                         </div>
                     </div>
 
-                    {/* Character */}
-                    <div className="character" style={{ fontSize: 100 }}>
-                        {config.character}
-                    </div>
+                    <div className="character">{config.character}</div>
 
-                    {/* Daily Challenge */}
                     <div style={{ 
                         position: 'fixed', 
                         bottom: 20, 
@@ -761,10 +725,9 @@
                         setQuestionNum(q => q + 1);
                         setSelected(null);
                         setFeedback(null);
-                        // Generate new exercise of same type
                         const generator = ExerciseGenerator[exercise.type];
                         if (generator) {
-                            // In real app, would fetch new exercise from server
+                            // Generar nuevo ejercicio del mismo tipo
                         }
                     }
                 }, 1500);
@@ -772,7 +735,6 @@
 
             return (
                 <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #E0F6FF 0%, #98D8C8 100%)', padding: 20 }}>
-                    {/* Header */}
                     <div style={{ 
                         maxWidth: 800, 
                         margin: '0 auto', 
@@ -789,15 +751,53 @@
                         </div>
                     </div>
 
-                    {/* Exercise Content */}
                     <div className="card pop" style={{ maxWidth: 800, margin: '0 auto', background: 'white', borderRadius: 32, padding: 40, boxShadow: '0 12px 40px rgba(0,0,0,0.15)' }}>
                         <div style={{ textAlign: 'center', marginBottom: 24 }}>
                             <div style={{ fontSize: 18, color: '#7F8C8D', marginBottom: 8 }}>{exercise.instruction}</div>
                             <h2 style={{ fontSize: 32, fontWeight: 900, color: '#2C3E50', marginBottom: 24 }}>{exercise.question}</h2>
-                            <div dangerouslySetInnerHTML={{ __html: exercise.visual }} style={{ marginBottom: 32 }} />
+                            
+                            {/* Visualización CORREGIDA para conteo */}
+                            {exercise.type === 'counting' && exercise.selectedItem && (
+                                <div className="objects-container">
+                                    {Array(exercise.count).fill(exercise.selectedItem).map((item, idx) => (
+                                        <div key={idx} className="counting-object" style={{animationDelay: `${idx * 0.1}s`}}>
+                                            {item}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            
+                            {/* Visualización para máquina de chicles */}
+                            {exercise.type === 'full-empty' && (
+                                <div style={{display:'flex',justifyContent:'center',gap:40px,margin:'20px 0'}}>
+                                    <div className="gumball-machine">
+                                        <div className="gumball-globe">
+                                            {exercise.correctAnswer === 'left' && (
+                                                <div className="gumballs-filled">
+                                                    {Array(25).fill(0).map((_, i) => (
+                                                        <div key={i} className="gumball" style={{background:['#FF6B6B','#4ECDC4','#FFE66D','#95E1D3'][i%4]}}></div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div style={{width:80px,height:100px;background:'linear-gradient(180deg,#E74C3C,#C0392B)',margin:'0 auto',borderRadius:'0 0 20px 20px'}}></div>
+                                    </div>
+                                    <div className="gumball-machine">
+                                        <div className="gumball-globe">
+                                            {exercise.correctAnswer === 'right' && (
+                                                <div className="gumballs-filled">
+                                                    {Array(25).fill(0).map((_, i) => (
+                                                        <div key={i} className="gumball" style={{background:['#FF6B6B','#4ECDC4','#FFE66D','#95E1D3'][i%4]}}></div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div style={{width:80px,height:100px;background:'linear-gradient(180deg,#E74C3C,#C0392B)',margin:'0 auto',borderRadius:'0 0 20px 20px'}}></div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Options */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 500, margin: '0 auto' }}>
                             {exercise.options.map((opt, idx) => {
                                 const isSelected = selected === opt.value;
@@ -812,16 +812,21 @@
                                         style={{
                                             borderColor: isCorrect ? '#2ECC71' : isWrong ? '#E74C3C' : '#E0E0E0',
                                             background: isCorrect ? '#E8F8F0' : isWrong ? '#FDEDEC' : 'white',
-                                            cursor: feedback ? 'not-allowed' : 'pointer',
-                                            opacity: feedback && !isSelected ? 0.5 : 1
+                                            cursor: feedback ? 'not-allowed' : 'pointer'
                                         }}
-                                        dangerouslySetInnerHTML={{ __html: opt.visual || opt.label }}
-                                    />
+                                    >
+                                        {exercise.type === 'colors' && opt.color && (
+                                            <div style={{width:32,height:32,borderRadius:'50%',background:opt.color,marginRight:12}}></div>
+                                        )}
+                                        {exercise.type === 'habitats' && opt.icon && (
+                                            <span style={{fontSize:32,marginRight:12}}>{opt.icon}</span>
+                                        )}
+                                        {opt.label}
+                                    </div>
                                 );
                             })}
                         </div>
 
-                        {/* Feedback */}
                         {feedback && (
                             <div className={`pop ${feedback === 'wrong' ? 'shake' : ''}`} style={{ 
                                 textAlign: 'center', 
