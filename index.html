@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathQuest - Plataforma Adaptativa por Edades</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --radius: 20px;
+            --scale: 1;
+            --anim-speed: 0.3s;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); transition: background var(--anim-speed); }
+        
+        /* Animaciones */
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        @keyframes pop { 0%{transform:scale(0.8);opacity:0} 70%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
+        @keyframes slide { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+        @keyframes confetti { 0%{transform:translateY(0) rotate(0);opacity:1} 100%{transform:translateY(-150px) rotate(360deg);opacity:0} }
+        
+        .float { animation: float 3s ease-in-out infinite; }
+        .pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .slide { animation: slide 0.5s ease-out forwards; }
+        .shake { animation: shake 0.4s ease-in-out; }
+        
+        .card { background: var(--card-bg); border-radius: var(--radius); padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); transition: all 0.3s; }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+        
+        .btn { padding: 12px 20px; border-radius: 12px; border: none; font-family: 'Nunito'; font-weight: 700; cursor: pointer; transition: all 0.2s; transform: scale(var(--scale)); }
+        .btn:active { transform: scale(0.95); }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px var(--primary)40; }
+        .btn-secondary { background: var(--secondary); color: white; }
+        .btn-outline { background: transparent; border: 2px solid #e2e8f0; color: var(--text-muted); }
+        
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+        
+        /* Temas por edad */
+        .theme-4-5 { --primary: #fbbf24; --secondary: #f87171; --bg: #fefce8; --radius: 28px; --scale: 1.15; }
+        .theme-6-7 { --primary: #6366f1; --secondary: #ec4899; --bg: #e0e7ff; --radius: 24px; --scale: 1.05; }
+        .theme-8-9 { --primary: #06b6d4; --secondary: #10b981; --bg: #ecfeff; --radius: 20px; --scale: 1; }
+        .theme-10-12 { --primary: #8b5cf6; --secondary: #f59e0b; --bg: #f5f3ff; --radius: 18px; --scale: 0.95; }
+        .theme-13-14 { --primary: #0f172a; --secondary: #3b82f6; --bg: #f8fafc; --radius: 16px; --scale: 0.9; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; opacity: 0.6; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback, useContext, createContext, useMemo } = React;
+
+        // ==========================================
+        // 1. CONFIGURACIÓN POR EDADES & TEMAS
+        // ==========================================
+        const AGE_CONFIG = {
+            '4-5': {
+                label: 'Exploradores',
+                themeClass: 'theme-4-5',
+                colors: { primary: '#fbbf24', secondary: '#f87171', accent: '#86efac' },
+                ui: { fontSize: '18px', btnSize: 'large', icons: 'big', spacing: 'lg' },
+                games: ['counting', 'shapes', 'colors', 'matching'],
+                rewards: { coinName: 'Estrellitas', icon: '⭐', xpMult: 0.8 },
+                description: 'Aprendizaje visual, sonidos y arrastrar/soltar'
+            },
+            '6-7': {
+                label: 'Aventureros',
+                themeClass: 'theme-6-7',
+                colors: { primary: '#6366f1', secondary: '#ec4899', accent: '#a78bfa' },
+                ui: { fontSize: '16px', btnSize: 'medium', icons: 'medium', spacing: 'md' },
+                games: ['addsub', 'sequences', 'memory', 'compare'],
+                rewards: { coinName: 'Gemas', icon: '💎', xpMult: 1.0 },
+                description: 'Sumas, restas, memoria y secuencias'
+            },
+            '8-9': {
+                label: 'Constructores',
+                themeClass: 'theme-8-9',
+                colors: { primary: '#06b6d4', secondary: '#10b981', accent: '#34d399' },
+                ui: { fontSize: '15px', btnSize: 'medium', icons: 'medium', spacing: 'md' },
+                games: ['muldiv', 'problems', 'timed', 'missions'],
+                rewards: { coinName: 'Monedas', icon: '🪙', xpMult: 1.2 },
+                description: 'Multiplicación, división y retos por tiempo'
+            },
+            '10-12': {
+                label: 'Estrategas',
+                themeClass: 'theme-10-12',
+                colors: { primary: '#8b5cf6', secondary: '#f59e0b', accent: '#c084fc' },
+                ui: { fontSize: '14px', btnSize: 'standard', icons: 'standard', spacing: 'sm' },
+                games: ['fractions', 'geometry', 'logic', 'rankings'],
+                rewards: { coinName: 'Puntos', icon: '🏆', xpMult: 1.5 },
+                description: 'Fracciones, geometría y lógica avanzada'
+            },
+            '13-14': {
+                label: 'Maestros',
+                themeClass: 'theme-13-14',
+                colors: { primary: '#0f172a', secondary: '#3b82f6', accent: '#60a5fa' },
+                ui: { fontSize: '13px', btnSize: 'compact', icons: 'standard', spacing: 'sm' },
+                games: ['algebra', 'reasoning', 'advanced', 'stats'],
+                rewards: { coinName: 'Créditos', icon: '🎓', xpMult: 1.8 },
+                description: 'Álgebra, razonamiento y estadísticas'
+            }
+        };
+
+        // ==========================================
+        // 2. MOTOR ADAPTATIVO (IA Simulada)
+        // ==========================================
+        const AdaptiveEngine = {
+            track(sessionHistory, currentDifficulty, accuracy, speed) {
+                if (sessionHistory.length < 3) return currentDifficulty;
+                const last3 = sessionHistory.slice(-3);
+                const avgAccuracy = last3.reduce((a,b) => a + (b.correct ? 1 : 0), 0) / 3;
+                const avgSpeed = last3.reduce((a,b) => a + b.time, 0) / 3;
+
+                if (avgAccuracy >= 0.85 && avgSpeed < 4) return Math.min(10, currentDifficulty + 1);
+                if (avgAccuracy <= 0.5 || avgSpeed > 12) return Math.max(1, currentDifficulty - 1);
+                return currentDifficulty;
+            },
+            generateNext(ageGroup, difficulty, lastPerformance) {
+                // Ajusta probabilidad de temas según rendimiento histórico
+                const weights = { ...lastPerformance?.weights || {} };
+                const weakAreas = Object.entries(weights).filter(([k,v]) => v < 0.6).map(x => x[0]);
+                const nextType = weakAreas.length > 0 && Math.random() > 0.3 ? weakAreas[0] : AGE_CONFIG[ageGroup].games[Math.floor(Math.random() * AGE_CONFIG[ageGroup].games.length)];
+                return { type: nextType, difficulty: difficulty, adaptive: true };
+            }
+        };
+
+        // ==========================================
+        // 3. GENERADORES DE EJERCICIOS POR EDAD
+        // ==========================================
+        const QuestionGenerator = {
+            'counting': (d) => {
+                const count = Math.floor(Math.random() * (d <= 2 ? 5 : 10)) + 1;
+                const items = ['🍎', '🐶', '🌟', '🚗', '🎈'];
+                const item = items[Math.floor(Math.random() * items.length)];
+                const display = Array(count).fill(item).join(' ');
+                return { q: `¿Cuántos ${item} hay?`, visual: display, ans: count, opts: [count-1, count, count+1, count+2].filter(x => x > 0).sort(() => Math.random()-0.5) };
+            },
+            'shapes': (d) => {
+                const shapes = [{name: 'Círculo', icon: '⭕'}, {name: 'Cuadrado', icon: '🟦'}, {name: 'Triángulo', icon: '🔺'}, {name: 'Estrella', icon: '⭐'}];
+                const target = shapes[Math.floor(Math.random() * shapes.length)];
+                return { q: 'Toca la figura correcta:', visual: `Busca: ${target.icon}`, ans: target.name, opts: shapes.map(s => s.name) };
+            },
+            'colors': (d) => {
+                const colors = ['Rojo', 'Azul', 'Verde', 'Amarillo'];
+                const target = colors[Math.floor(Math.random() * colors.length)];
+                const hex = {Rojo:'#ef4444', Azul:'#3b82f6', Verde:'#22c55e', Amarillo:'#eab308'}[target];
+                return { q: `¿De qué color es este bloque?`, visual: `<div style="width:60px;height:60px;background:${hex};border-radius:12px;display:inline-block"></div>`, ans: target, opts: colors };
+            },
+            'addsub': (d) => {
+                const max = d <= 2 ? 10 : 20;
+                const isAdd = Math.random() > 0.5;
+                const a = Math.floor(Math.random() * max) + 1;
+                const b = Math.floor(Math.random() * (isAdd ? max - a : a)) + 1;
+                return { q: `${a} ${isAdd ? '+' : '-'} ${b} = ?`, visual: '', ans: isAdd ? a+b : a-b, opts: [isAdd?a+b+1:a-b-2, isAdd?a+b:a-b, isAdd?a+b-1:a-b+1, isAdd?a+b+2:a-b-2].filter(x=>x>=0) };
+            },
+            'muldiv': (d) => {
+                const max = d <= 3 ? 5 : 10;
+                const a = Math.floor(Math.random() * max) + 2;
+                const b = Math.floor(Math.random() * max) + 2;
+                return { q: `${a} × ${b} = ?`, visual: '', ans: a*b, opts: [a*b, a*b-1, a*b+2, a*b-3].filter(x=>x>0) };
+            },
+            'fractions': (d) => {
+                const num = Math.floor(Math.random()*3)+1;
+                const den = num + Math.floor(Math.random()*3)+2;
+                return { q: `¿Qué fracción representa ${num} de ${den} partes?`, visual: `🟨🟨🟦`.repeat(num) + '🟦'.repeat(den-num), ans: `${num}/${den}`, opts: [`${num}/${den}`, `${num+1}/${den}`, `${num}/${den-1}`, `${den}/${num}`] };
+            },
+            'algebra': (d) => {
+                const x = Math.floor(Math.random()*10)+1;
+                const c = Math.floor(Math.random()*20)+5;
+                return { q: `Si 2x + ${c} = ${2*x+c}, ¿cuánto vale x?`, visual: '', ans: x, opts: [x, x-1, x+2, Math.floor((2*x+c)/2)] };
+            },
+            // Fallback genérico para otros tipos
+            default: (d) => {
+                const ops = ['+','-','×','÷'];
+                const op = ops[Math.floor(Math.random()*4)];
+                const a = Math.floor(Math.random()*12)+2;
+                const b = Math.floor(Math.random()*10)+2;
+                let ans;
+                switch(op){
+                    case '+': ans=a+b; break;
+                    case '-': ans=Math.abs(a-b); break;
+                    case '×': ans=a*b; break;
+                    case '÷': ans=b; break; // a/b simplificado
+                }
+                return { q: `${a} ${op} ${b} = ?`, visual: '', ans, opts: [ans, ans-1, ans+2, ans+5] };
+            }
+        };
+
+        // ==========================================
+        // 4. COMPONENTES PRINCIPALES
+        // ==========================================
+        function SoundEngine() {
+            const ctx = useRef(null);
+            const play = (type) => {
+                if(!ctx.current) ctx.current = new (window.AudioContext || window.webkitAudioContext)();
+                const c = ctx.current, o = c.createOscillator(), g = c.createGain();
+                o.connect(g); g.connect(c.destination);
+                const now = c.currentTime;
+                if(type==='correct') { o.frequency.setValueAtTime(523.25, now); o.frequency.setValueAtTime(783.99, now+0.1); g.gain.setValueAtTime(0.2,now); g.gain.exponentialRampToValueAtTime(0.01,now+0.2); o.start(now); o.stop(now+0.2); }
+                else if(type==='wrong') { o.type='sawtooth'; o.frequency.setValueAtTime(200,now); g.gain.setValueAtTime(0.15,now); g.gain.exponentialRampToValueAtTime(0.01,now+0.2); o.start(now); o.stop(now+0.2); }
+                else if(type==='click') { o.frequency.setValueAtTime(800,now); g.gain.setValueAtTime(0.1,now); g.gain.exponentialRampToValueAtTime(0.01,now+0.1); o.start(now); o.stop(now+0.1); }
+            };
+            return { play };
+        }
+
+        function App() {
+            const [user, setUser] = useState(null);
+            const [screen, setScreen] = useState('login');
+            const [ageGroup, setAgeGroup] = useState(null);
+            const [stats, setStats] = useState({ xp:0, coins:0, level:1, accuracy:0, streak:0, history:[], typeStats:{} });
+            const [difficulty, setDifficulty] = useState(1);
+            const [theme, setTheme] = useState('');
+            const sound = useRef(SoundEngine()).current;
+
+            // Cargar datos
+            useEffect(() => {
+                const saved = localStorage.getItem('mq_data');
+                if(saved) {
+                    const d = JSON.parse(saved);
+                    if(d.user) { setUser(d.user); setAgeGroup(d.ageGroup); setTheme(AGE_CONFIG[d.ageGroup]?.themeClass || ''); setStats(d.stats); setDifficulty(d.difficulty || 1); }
+                }
+            }, []);
+
+            // Guardar
+            useEffect(() => { if(user) localStorage.setItem('mq_data', JSON.stringify({ user, ageGroup, stats, difficulty })); }, [user, ageGroup, stats, difficulty]);
+
+            const handleLogin = (name, age) => {
+                sound.play('click');
+                let group = age <= 5 ? '4-5' : age <= 7 ? '6-7' : age <= 9 ? '8-9' : age <= 12 ? '10-12' : '13-14';
+                setUser({ name, age, group });
+                setAgeGroup(group);
+                setTheme(AGE_CONFIG[group].themeClass);
+                setScreen('dashboard');
+            };
+
+            const finishSession = (correct, total, time, type) => {
+                const acc = correct/total;
+                sound.play(acc >= 0.7 ? 'correct' : 'wrong');
+                const cfg = AGE_CONFIG[ageGroup];
+                const xpGain = Math.round(correct * 10 * cfg.rewards.xpMult);
+                const coinsGain = Math.round(correct * 3);
+                const newDiff = AdaptiveEngine.track(stats.history, difficulty, acc, time/correct);
+                setDifficulty(newDiff);
+                setStats(s => ({
+                    ...s,
+                    xp: s.xp + xpGain,
+                    coins: s.coins + coinsGain,
+                    level: Math.floor((s.xp + xpGain) / 100) + 1,
+                    accuracy: s.history.length === 0 ? acc : (s.accuracy * s.history.length + acc) / (s.history.length + 1),
+                    streak: acc >= 0.8 ? s.streak + 1 : 0,
+                    history: [...s.history.slice(-9), { correct: acc >= 0.8, time }],
+                    typeStats: { ...s.typeStats, [type]: { correct: (s.typeStats[type]?.correct||0)+correct, total: (s.typeStats[type]?.total||0)+total } }
+                }));
+                setScreen('dashboard');
+            };
+
+            return (
+                <div className={theme}>
+                    {screen === 'login' && <LoginScreen onStart={handleLogin} />}
+                    {screen === 'dashboard' && <Dashboard user={user} ageGroup={ageGroup} stats={stats} onPlay={() => setScreen('game')} onTheme={theme} onLogout={() => {localStorage.removeItem('mq_data'); setUser(null); setScreen('login');}} />}
+                    {screen === 'game' && <GameSession ageGroup={ageGroup} difficulty={difficulty} stats={stats} onFinish={finishSession} sound={sound} />}
+                </div>
+            );
+        }
+
+        function LoginScreen({ onStart }) {
+            const [name, setName] = useState('');
+            const [age, setAge] = useState('');
+            return (
+                <div style={{minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'linear-gradient(135deg, #667eea, #764ba2)', padding:20}}>
+                    <div className="card" style={{maxWidth:400, width:'100%', textAlign:'center'}}>
+                        <div className="float" style={{fontSize:64, marginBottom:10}}>🎓</div>
+                        <h1 style={{fontSize:32, fontWeight:900, marginBottom:8}}>MathQuest</h1>
+                        <p style={{color:'#64748b', marginBottom:20}}>Aprende matemáticas adaptadas a tu edad</p>
+                        <input placeholder="Tu nombre" value={name} onChange={e=>setName(e.target.value)} style={{width:'100%', padding:'14px', borderRadius:12, border:'2px solid #e2e8f0', fontSize:16, fontFamily:'Nunito', marginBottom:12}} />
+                        <input type="number" placeholder="Tu edad (4-14)" value={age} onChange={e=>setAge(e.target.value)} min="4" max="14" style={{width:'100%', padding:'14px', borderRadius:12, border:'2px solid #e2e8f0', fontSize:16, fontFamily:'Nunito', marginBottom:16}} />
+                        <button onClick={()=> name && age>=4 && age<=14 && onStart(name, parseInt(age))} className="btn btn-primary" style={{width:'100%', fontSize:18, opacity: name&&age>=4&&age<=14?1:0.5}}>
+                            🚀 ¡Empezar aventura!
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        function Dashboard({ user, ageGroup, stats, onPlay, theme, onLogout }) {
+            const cfg = AGE_CONFIG[ageGroup];
+            return (
+                <div style={{maxWidth:800, margin:'0 auto', padding:'20px 16px 60px'}}>
+                    <header style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24}}>
+                        <div>
+                            <h1 style={{fontSize:28, fontWeight:900}}>¡Hola, {user.name}! 👋</h1>
+                            <span style={{background:cfg.colors.primary, color:'#fff', padding:'4px 12px', borderRadius:20, fontSize:12, fontWeight:700}}>{cfg.label} ({ageGroup})</span>
+                        </div>
+                        <div style={{display:'flex', gap:12, alignItems:'center'}}>
+                            <span style={{fontWeight:800}}>{cfg.rewards.icon} {stats.coins}</span>
+                            <button onClick={onLogout} className="btn btn-outline" style={{padding:'8px 12px'}}>🚪</button>
+                        </div>
+                    </header>
+
+                    <div className="card" style={{background:`linear-gradient(135deg, ${cfg.colors.primary}, ${cfg.colors.secondary})`, color:'#fff', marginBottom:20}}>
+                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                            <div>
+                                <div style={{fontSize:14, opacity:0.9}}>Nivel {stats.level}</div>
+                                <div style={{fontSize:32, fontWeight:900}}>{stats.xp} XP</div>
+                            </div>
+                            <div style={{width:80, height:80, borderRadius:'50%', background:'rgba(255,255,255,0.2)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:40}}>🏅</div>
+                        </div>
+                        <div style={{marginTop:12, background:'rgba(255,255,255,0.3)', height:8, borderRadius:4}}>
+                            <div style={{width:`${(stats.xp % 100)}%`, height:'100%', background:'#fff', borderRadius:4, transition:'width 0.5s'}}></div>
+                        </div>
+                    </div>
+
+                    <button onClick={onPlay} className="btn btn-primary" style={{width:'100%', padding:'18px', fontSize:20, marginBottom:20, boxShadow:`0 8px 24px ${cfg.colors.primary}50`}}>
+                        🎮 Jugar Ahora
+                    </button>
+
+                    <h3 style={{fontSize:18, fontWeight:800, marginBottom:12}}>📊 Tu Progreso</h3>
+                    <div className="grid-2" style={{marginBottom:20}}>
+                        <div className="card" style={{textAlign:'center'}}>
+                            <div style={{fontSize:24}}>🎯</div>
+                            <div style={{fontSize:20, fontWeight:800}}>{stats.accuracy > 0 ? `${Math.round(stats.accuracy*100)}%` : '-'}</div>
+                            <div style={{fontSize:12, color:'#64748b'}}>Precisión</div>
+                        </div>
+                        <div className="card" style={{textAlign:'center'}}>
+                            <div style={{fontSize:24}}>🔥</div>
+                            <div style={{fontSize:20, fontWeight:800}}>{stats.streak}</div>
+                            <div style={{fontSize:12, color:'#64748b'}}>Racha actual</div>
+                        </div>
+                    </div>
+
+                    <h3 style={{fontSize:18, fontWeight:800, marginBottom:12}}>🧩 Juegos Disponibles</h3>
+                    <div className="grid-4">
+                        {cfg.games.map(g => (
+                            <div key={g} className="card" style={{textAlign:'center', cursor:'pointer', border:`2px solid ${cfg.colors.primary}20`}} onClick={onPlay}>
+                                <div style={{fontSize:32, marginBottom:6}}>{g==='counting'?'🔢':g==='shapes'?'🔺':g==='colors'?'🎨':g==='addsub'?'➕':g==='muldiv'?'✖️':g==='fractions'?'🥧':g==='algebra'?'🧮':'📝'}</div>
+                                <div style={{fontWeight:700, fontSize:14}}>{g.charAt(0).toUpperCase()+g.slice(1)}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        function GameSession({ ageGroup, difficulty, stats, onFinish, sound }) {
+            const cfg = AGE_CONFIG[ageGroup];
+            const [current, setCurrent] = useState(null);
+            const [session, setSession] = useState({ correct:0, total:0, start:Date.now(), type:cfg.games[0] });
+            const [selected, setSelected] = useState(null);
+            const [feedback, setFeedback] = useState(null);
+            const [time, setTime] = useState(0);
+            const timer = useRef();
+
+            useEffect(() => {
+                generate();
+                timer.current = setInterval(() => setTime(t => t+1), 1000);
+                return () => clearInterval(timer.current);
+            }, []);
+
+            const generate = () => {
+                const type = cfg.games[Math.floor(Math.random()*cfg.games.length)];
+                const qGen = QuestionGenerator[type] || QuestionGenerator.default;
+                setCurrent({ ...qGen(difficulty), type });
+            };
+
+            const handleAnswer = (val) => {
+                if(feedback) return;
+                setSelected(val);
+                const isCorrect = String(val) === String(current.ans);
+                sound.play(isCorrect ? 'correct' : 'wrong');
+                setFeedback(isCorrect ? '🎉 ¡Correcto!' : '💪 ¡Casi!');
+                setSession(s => ({ ...s, correct: s.correct + (isCorrect?1:0), total: s.total+1 }));
+                setTimeout(() => {
+                    if(session.total + 1 >= 10) {
+                        clearInterval(timer.current);
+                        onFinish(session.correct + (isCorrect?1:0), session.total + 1, time, session.type);
+                    } else {
+                        setFeedback(null); setSelected(null); generate();
+                    }
+                }, 1000);
+            };
+
+            return (
+                <div style={{maxWidth:600, margin:'0 auto', padding:20, textAlign:'center'}}>
+                    <div style={{display:'flex', justifyContent:'space-between', marginBottom:20}}>
+                        <button className="btn btn-outline" style={{padding:'8px 12px'}} onClick={()=>onFinish(session.correct, session.total, time, session.type)}>✕ Salir</button>
+                        <div style={{fontWeight:800}}>⏱️ {Math.floor(time/60)}:{(time%60).toString().padStart(2,'0')}</div>
+                    </div>
+
+                    <div className="card pop" style={{minHeight:200, display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', background:'#fff', marginBottom:20}}>
+                        <div style={{fontSize:14, color:cfg.colors.primary, fontWeight:700, marginBottom:8, textTransform:'uppercase'}}>{current?.type}</div>
+                        <div style={{fontSize:24, fontWeight:800, marginBottom:12, whiteSpace:'pre-wrap'}}>{current?.q}</div>
+                        <div dangerouslySetInnerHTML={{__html: current?.visual || ''}} style={{marginBottom:12, fontSize: ageGroup==='4-5'?'32px':'20px'}} />
+                    </div>
+
+                    <div className="grid-2" style={{marginBottom:16}}>
+                        {current?.opts.map((opt, i) => (
+                            <button key={i} className="btn" style={{
+                                padding: ageGroup==='4-5'?'24px':'16px', fontSize: ageGroup==='4-5'?'22px':'18px',
+                                background: selected===opt ? (feedback?.includes('🎉')?'#dcfce7':'#fef2f2') : '#fff',
+                                border: `3px solid ${selected===opt ? (feedback?.includes('🎉')?'#22c55e':'#ef4444') : '#e2e8f0'}`,
+                                color: selected===opt ? (feedback?.includes('🎉')?'#166534':'#991b1b') : '#1e293b',
+                                transform: selected===opt ? 'scale(0.95)' : '1'
+                            }} onClick={()=>handleAnswer(opt)} disabled={!!feedback}>
+                                {opt}
+                            </button>
+                        ))}
+                    </div>
+                    {feedback && <div className={`pop ${feedback.includes('💪')?'shake':''}`} style={{padding:12, borderRadius:12, background:feedback.includes('🎉')?'#dcfce7':'#fef2f2', fontWeight:700, fontSize:16}}>{feedback}</div>}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
