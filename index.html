@@ -3,41 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MathQuest - Estilo Smartick</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>MathQuest - Aprende Jugando</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Nunito', sans-serif; 
+        body {
+            font-family: 'Nunito', sans-serif;
             background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 50%, #98D8C8 100%);
             min-height: 100vh;
-            overflow-x: hidden;
         }
-        
+
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
-        @keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(255,255,255,0.8)} 50%{box-shadow:0 0 40px rgba(255,255,255,1)} }
-        @keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 75%{transform:translateX(10px)} }
         @keyframes pop { 0%{transform:scale(0.8);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
-        
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 75%{transform:translateX(10px)} }
+        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+
         .float { animation: float 3s ease-in-out infinite; }
-        .pulse { animation: pulse 2s ease-in-out infinite; }
-        .glow { animation: glow 2s ease-in-out infinite; }
-        .slide-up { animation: slideUp 0.5s ease-out; }
-        .shake { animation: shake 0.5s ease-in-out; }
         .pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .shake { animation: shake 0.5s ease-in-out; }
 
         .bubble {
-            width: 200px;
-            height: 200px;
+            width: 180px;
+            height: 180px;
             border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0.4));
             border: 4px solid rgba(255,255,255,0.8);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1), inset 0 0 20px rgba(255,255,255,0.5);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -45,37 +36,23 @@
             cursor: pointer;
             transition: all 0.3s;
             position: relative;
-            backdrop-filter: blur(10px);
         }
-        
+
         .bubble:hover:not(.locked) {
             transform: translateY(-8px) scale(1.05);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.15), inset 0 0 30px rgba(255,255,255,0.8);
         }
-        
+
         .bubble.locked {
             opacity: 0.6;
             cursor: not-allowed;
             filter: grayscale(0.5);
         }
-        
-        .bubble-icon {
-            font-size: 64px;
-            margin-bottom: 8px;
-        }
-        
-        .bubble-label {
-            font-weight: 800;
-            font-size: 16px;
-            color: #2C3E50;
-            text-align: center;
-        }
-        
+
+        .bubble-icon { font-size: 60px; margin-bottom: 8px; }
+        .bubble-label { font-weight: 800; font-size: 14px; color: #2C3E50; text-align: center; }
+
         .lock-overlay {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             font-size: 48px;
             background: rgba(0,0,0,0.3);
             border-radius: 50%;
@@ -86,134 +63,45 @@
             justify-content: center;
         }
 
-        .tag-option {
+        .btn {
+            padding: 14px 24px;
+            border-radius: 14px;
+            border: none;
+            font-family: 'Nunito';
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:active { transform: scale(0.95); }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 8px 24px rgba(102,126,234,0.4);
+        }
+
+        .option-btn {
             background: white;
             border: 4px solid #E0E0E0;
             border-radius: 16px;
-            padding: 16px;
-            margin: 8px 0;
+            padding: 18px;
+            margin: 10px 0;
             cursor: pointer;
+            font-weight: 700;
+            font-size: 18px;
+            font-family: 'Nunito';
             transition: all 0.3s;
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 12px;
-            min-width: 180px;
-            font-weight: 700;
-            font-size: 18px;
-        }
-        
-        .tag-option:hover {
-            border-color: #3498DB;
-            transform: translateX(8px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        
-        .tag-option.selected {
-            border-color: #2ECC71;
-            background: #E8F8F0;
-            transform: scale(1.05);
-        }
-        
-        .tag-option.wrong {
-            border-color: #E74C3C;
-            background: #FDEDEC;
-            animation: shake 0.5s;
         }
 
-        .gumball-machine {
-            width: 150px;
-            height: 220px;
-            position: relative;
-            cursor: pointer;
-            transition: transform 0.3s;
-            display: inline-block;
-        }
-        
-        .gumball-machine:hover {
-            transform: scale(1.05);
-        }
-        
-        .gumball-globe {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 4px solid rgba(0,0,0,0.2);
-            position: absolute;
-            top: 10px;
-            left: 15px;
-            overflow: hidden;
-            background: rgba(255,255,255,0.3);
-        }
-        
-        .gumballs-filled {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 2px;
-            padding: 8px;
-        }
-        
-        .gumball {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.2);
-        }
-
-        .world-bg {
-            background: linear-gradient(180deg, #FFB347 0%, #FFCC99 40%, #DEB887 100%);
-            min-height: 100vh;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .world-bg::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px);
-            background-size: 50px 50px;
-            opacity: 0.3;
-        }
-
-        .character {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            font-size: 80px;
-            animation: float 3s ease-in-out infinite;
-            z-index: 100;
-            cursor: pointer;
-        }
-
-        .xp-badge {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            border-radius: 20px;
-            padding: 8px 16px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 800;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        .progress-bar {
-            background: rgba(255,255,255,0.3);
-            border-radius: 20px;
-            height: 30px;
-            overflow: hidden;
-            border: 3px solid white;
-        }
-        
-        .progress-fill {
-            background: linear-gradient(90deg, #2ECC71, #27AE60);
-            height: 100%;
-            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 17px;
-        }
+        .option-btn:hover { border-color: #3498DB; transform: translateX(8px); }
+        .option-btn.selected { border-color: #2ECC71; background: #E8F8F0; transform: scale(1.05); }
+        .option-btn.wrong { border-color: #E74C3C; background: #FDEDEC; animation: shake 0.5s; }
 
         .objects-container {
             display: flex;
@@ -231,622 +119,569 @@
         .counting-object {
             font-size: 48px;
             animation: pop 0.5s ease-out;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .gumball-machine {
+            width: 150px;
+            height: 220px;
+            position: relative;
+            display: inline-block;
+            margin: 0 20px;
+        }
+
+        .gumball-globe {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid rgba(0,0,0,0.2);
+            overflow: hidden;
+            background: rgba(255,255,255,0.3);
+            position: relative;
+        }
+
+        .gumballs-filled {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 2px;
+            padding: 8px;
+        }
+
+        .gumball {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #FF6B6B;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.3);
+            border-radius: 20px;
+            height: 24px;
+            overflow: hidden;
+            border: 3px solid white;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #2ECC71, #27AE60);
+            height: 100%;
+            transition: width 0.8s;
+            border-radius: 17px;
+        }
+
+        .hidden { display: none !important; }
+
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px;">
+        <div class="card pop" style="background: white; border-radius: 32px; padding: 40px; max-width: 450px; width: 100%; text-align: center;">
+            <div class="float" style="font-size: 80px; margin-bottom: 16px;">🎓</div>
+            <h1 style="font-size: 36px; font-weight: 900; margin-bottom: 8px; color: #2C3E50;">MathQuest</h1>
+            <p style="color: #7F8C8D; margin-bottom: 32px; font-size: 16px;">Aprende jugando como en Smartick</p>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+            <input id="name-input" placeholder="Tu nombre" style="width: 100%; padding: 16px 20px; border-radius: 16px; border: 3px solid #E0E0E0; font-size: 18px; font-family: 'Nunito'; margin-bottom: 16px;">
 
+            <input id="age-input" type="number" placeholder="Tu edad (4-14)" min="4" max="14" style="width: 100%; padding: 16px 20px; border-radius: 16px; border: 3px solid #E0E0E0; font-size: 18px; font-family: 'Nunito'; margin-bottom: 24px;">
+
+            <button id="start-btn" class="btn btn-primary" style="width: 100%; font-size: 20px;">🚀 ¡Comenzar Aventura!</button>
+        </div>
+    </div>
+
+    <!-- WORLD MAP SCREEN -->
+    <div id="world-screen" class="hidden" style="min-height: 100vh; background: linear-gradient(180deg, #FFB347 0%, #FFCC99 40%, #DEB887 100%); padding-bottom: 100px;">
+        <header style="background: rgba(255,255,255,0.9); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+            <div>
+                <h1 id="user-greeting" style="font-size: 24px; font-weight: 900; color: #2C3E50;"></h1>
+                <span id="age-badge" style="background: #3498DB; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;"></span>
+            </div>
+            <div style="display: flex; gap: 16px; align-items: center;">
+                <div id="xp-badge" style="background: linear-gradient(135deg, #FFD700, #FFA500); border-radius: 20px; padding: 8px 16px; font-weight: 800;"></div>
+                <button onclick="logout()" style="background: #E74C3C; color: white; border: none; border-radius: 12px; padding: 8px 16px; cursor: pointer; font-weight: 700; font-family: 'Nunito';">🚪</button>
+            </div>
+        </header>
+
+        <div style="max-width: 600px; margin: 24px auto; padding: 0 20px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 700; color: #2C3E50;">
+                <span id="level-text"></span>
+                <span id="xp-text"></span>
+            </div>
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <div style="max-width: 900px; margin: 40px auto; display: flex; flex-direction: column; align-items: center; gap: 32px; padding: 0 20px;">
+            <h2 style="font-size: 28px; font-weight: 900; color: #2C3E50;"> Mundos de Aprendizaje</h2>
+
+            <div id="worlds-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 32px;"></div>
+        </div>
+
+        <div id="character" class="float" style="position: fixed; bottom: 20px; right: 20px; font-size: 80px; cursor: pointer;"></div>
+
+        <div class="pulse" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #FFD700, #FFA500); padding: 16px 32px; border-radius: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); cursor: pointer; font-weight: 800; font-size: 16px; color: #2C3E50;">
+            🎯 Reto Diario: Completa 3 ejercicios
+        </div>
+    </div>
+
+    <!-- EXERCISE SCREEN -->
+    <div id="exercise-screen" class="hidden" style="min-height: 100vh; background: linear-gradient(180deg, #E0F6FF 0%, #98D8C8 100%); padding: 20px;">
+        <div style="max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <button onclick="showWorld()" class="btn" style="background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">← Volver</button>
+            <div style="background: white; padding: 8px 20px; border-radius: 20px; font-weight: 800; font-size: 18px;" id="question-counter">1 / 10</div>
+        </div>
+
+        <div class="card pop" style="max-width: 800px; margin: 0 auto; text-align: center;">
+            <div style="font-size: 18px; color: #7F8C8D; margin-bottom: 8px;" id="instruction-text"></div>
+            <h2 id="question-text" style="font-size: 32px; font-weight: 900; color: #2C3E50; margin-bottom: 24px;"></h2>
+            <div id="visual-container"></div>
+            <div id="options-container" style="max-width: 500px; margin: 20px auto 0;"></div>
+            <div id="feedback-container" style="margin-top: 24px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CONFIGURACIÓN POR EDADES
+        // ==========================================
         const AGE_CONFIG = {
             '4-5': {
                 label: 'Preescolar',
                 worlds: ['numeros', 'colores', 'formas'],
                 lockedWorlds: ['sumas', 'restas'],
-                exercises: ['counting', 'colors', 'shapes', 'matching', 'full-empty', 'habitats'],
+                exercises: ['counting', 'colors', 'full-empty', 'habitats'],
                 maxDifficulty: 3,
-                character: '🐻',
-                bgColor: '#FFE5B4'
+                character: '🐻'
             },
             '6-7': {
                 label: 'Básico',
                 worlds: ['numeros', 'colores', 'formas', 'sumas', 'restas'],
                 lockedWorlds: ['multiplicacion'],
-                exercises: ['addsub', 'sequences', 'compare', 'full-empty', 'habitats', 'colors'],
+                exercises: ['addsub', 'compare', 'full-empty', 'habitats'],
                 maxDifficulty: 5,
-                character: '🦊',
-                bgColor: '#B5EAD7'
+                character: '🦊'
             },
             '8-9': {
                 label: 'Intermedio',
                 worlds: ['numeros', 'sumas', 'restas', 'multiplicacion', 'division_basica'],
                 lockedWorlds: ['fracciones'],
-                exercises: ['muldiv', 'problems', 'timed', 'geometry', 'logic'],
+                exercises: ['muldiv', 'problems', 'logic'],
                 maxDifficulty: 7,
-                character: '🦁',
-                bgColor: '#C7CEEA'
+                character: '🦁'
             },
             '10-12': {
                 label: 'Avanzado',
                 worlds: ['fracciones', 'geometria', 'logica', 'problemas'],
                 lockedWorlds: ['algebra'],
-                exercises: ['fractions', 'geometry', 'algebra', 'reasoning', 'stats'],
+                exercises: ['fractions', 'geometry', 'algebra'],
                 maxDifficulty: 10,
-                character: '🦅',
-                bgColor: '#FFDAC1'
+                character: '🦅'
             },
             '13-14': {
                 label: 'Experto',
                 worlds: ['algebra', 'razonamiento', 'estadistica', 'desafios'],
                 lockedWorlds: [],
-                exercises: ['algebra', 'reasoning', 'advanced', 'optimization'],
+                exercises: ['algebra', 'reasoning', 'advanced'],
                 maxDifficulty: 12,
-                character: '🦉',
-                bgColor: '#E2F0CB'
+                character: ''
             }
         };
 
+        const WORLDS = [
+            { id: 'numeros', name: 'Números', icon: '', color: '#FF6B6B' },
+            { id: 'colores', name: 'Colores', icon: '🎨', color: '#4ECDC4' },
+            { id: 'formas', name: 'Formas', icon: '🔷', color: '#FFE66D' },
+            { id: 'sumas', name: 'Sumas', icon: '➕', color: '#95E1D3' },
+            { id: 'restas', name: 'Restas', icon: '➖', color: '#F38181' },
+            { id: 'multiplicacion', name: 'Multiplicar', icon: '✖️', color: '#AA96DA' }
+        ];
+
         // ==========================================
-        // GENERADORES DE EJERCICIOS CORREGIDOS
+        // ESTADO DE LA APP
         // ==========================================
-        const ExerciseGenerator = {
-            // Ejercicio de conteo CORREGIDO
-            counting: (difficulty) => {
-                const max = Math.max(2, difficulty * 3);
-                const count = Math.floor(Math.random() * max) + 1;
-                const items = ['🍎', '', '🎈', '🍊', '', ''];
-                const item = items[Math.floor(Math.random() * items.length)];
-                
-                // Crear visualización CORREGIDA
-                const visualContent = Array(count).fill(item).join(' ');
-                
-                return {
-                    type: 'counting',
-                    instruction: 'Cuenta los objetos.',
-                    question: '¿Cuántos hay?',
-                    items: items,
-                    count: count,
-                    selectedItem: item,
-                    correctAnswer: count,
-                    options: [count-1, count, count+1, count+2].filter(x => x > 0).sort(() => Math.random() - 0.5)
-                        .map(n => ({ label: n.toString(), value: n }))
-                };
-            },
+        let user = null;
+        let ageGroup = null;
+        let stats = { xp: 0, stars: 0, level: 1, completedWorlds: [] };
+        let unlockedWorlds = [];
+        let currentExercise = null;
+        let difficulty = 1;
+        let questionNum = 1;
+        let correctCount = 0;
+        const totalQuestions = 10;
 
-            // Ejercicio de colores
-            colors: (difficulty) => {
-                const colors = [
-                    { name: 'Verde', hex: '#2ECC71', icon: '🟢' },
-                    { name: 'Rojo', hex: '#E74C3C', icon: '🔴' },
-                    { name: 'Azul', hex: '#3498DB', icon: '🔵' },
-                    { name: 'Amarillo', hex: '#F1C40F', icon: '🟡' }
-                ];
-                const target = colors[Math.floor(Math.random() * colors.length)];
-                const items = ['🍎', '', '🍊', '🫐'];
-                const item = items[Math.floor(Math.random() * items.length)];
-                
-                return {
-                    type: 'colors',
-                    instruction: 'Marca las etiquetas correctas.',
-                    question: `¿De qué color es esta ${item}?`,
-                    correctAnswer: target.name,
-                    options: colors.map(c => ({
-                        label: c.name,
-                        value: c.name,
-                        color: c.hex
-                    }))
-                };
-            },
-
-            // Ejercicio de lleno/vacío
-            'full-empty': (difficulty) => {
-                const fullSide = Math.random() > 0.5 ? 'left' : 'right';
-                
-                return {
-                    type: 'full-empty',
-                    instruction: 'Responde la pregunta.',
-                    question: '¿Cuál está llena?',
-                    correctAnswer: fullSide,
-                    options: [
-                        { label: 'Izquierda', value: 'left' },
-                        { label: 'Derecha', value: 'right' }
-                    ]
-                };
-            },
-
-            // Ejercicio de hábitats
-            habitats: (difficulty) => {
-                const animals = [
-                    { name: 'elefante', icon: '🐘', habitat: 'Sabana', wrong: ['Océano', 'Cielo'] },
-                    { name: 'tiburón', icon: '🦈', habitat: 'Océano', wrong: ['Sabana', 'Cielo'] },
-                    { name: 'águila', icon: '🦅', habitat: 'Cielo', wrong: ['Océano', 'Sabana'] },
-                    { name: 'oso', icon: '🐻', habitat: 'Bosque', wrong: ['Océano', 'Cielo'] }
-                ];
-                const animal = animals[Math.floor(Math.random() * animals.length)];
-                
-                const allHabitats = [
-                    { name: 'Océano', icon: '🌊' },
-                    { name: 'Sabana', icon: '🌍' },
-                    { name: 'Cielo', icon: '☁️' },
-                    { name: 'Bosque', icon: '🌲' }
-                ];
-                
-                const options = [
-                    allHabitats.find(h => h.name === animal.habitat),
-                    ...allHabitats.filter(h => animal.wrong.includes(h.name)).slice(0, 2)
-                ].sort(() => Math.random() - 0.5);
-
-                return {
-                    type: 'habitats',
-                    instruction: 'Marca las etiquetas correctas.',
-                    question: `¿Dónde vive el/la ${animal.name}?`,
-                    correctAnswer: animal.habitat,
-                    options: options.map(h => ({
-                        label: h.name,
-                        value: h.name,
-                        icon: h.icon
-                    }))
-                };
-            },
-
-            // Sumas y restas
-            addsub: (difficulty) => {
-                const max = difficulty * 3;
-                const isAdd = Math.random() > 0.5;
-                const a = Math.floor(Math.random() * max) + 1;
-                const b = Math.floor(Math.random() * (isAdd ? max - a : a)) + 1;
-                
-                return {
-                    type: 'addsub',
-                    instruction: 'Resuelve la operación.',
-                    question: `${a} ${isAdd ? '+' : '-'} ${b} = ?`,
-                    correctAnswer: isAdd ? a + b : a - b,
-                    options: [isAdd ? a+b : a-b, isAdd ? a+b+1 : a-b-1, isAdd ? a+b-1 : a-b+1, isAdd ? a+b+2 : a-b-2]
-                        .filter(x => x >= 0).sort(() => Math.random() - 0.5)
-                        .map(n => ({ label: n.toString(), value: n }))
-                };
-            },
-
-            // Multiplicación y división
-            muldiv: (difficulty) => {
-                const max = Math.min(difficulty * 2, 12);
-                const isMul = Math.random() > 0.4;
-                const a = Math.floor(Math.random() * max) + 2;
-                const b = Math.floor(Math.random() * max) + 2;
-                
-                if (isMul) {
+        // ==========================================
+        // GENERADORES DE EJERCICIOS
+        // ==========================================
+        function generateExercise(type, diff) {
+            switch(type) {
+                case 'counting':
+                    const count = Math.floor(Math.random() * Math.max(2, diff * 3)) + 1;
+                    const items = ['🍎', '', '🎈', '', '', ''];
+                    const item = items[Math.floor(Math.random() * items.length)];
                     return {
-                        type: 'muldiv',
-                        instruction: 'Resuelve la multiplicación.',
-                        question: `${a} × ${b} = ?`,
-                        correctAnswer: a * b,
-                        options: [a*b, a*b-1, a*b+2, a*b-3].filter(x => x > 0).sort(() => Math.random() - 0.5)
-                            .map(n => ({ label: n.toString(), value: n }))
+                        type: 'counting',
+                        instruction: 'Cuenta los objetos.',
+                        question: '¿Cuántos hay?',
+                        count: count,
+                        item: item,
+                        correctAnswer: count,
+                        options: [count-1, count, count+1, count+2].filter(x => x > 0).sort(() => Math.random() - 0.5)
                     };
-                } else {
-                    const ans = Math.floor(Math.random() * (max - 2)) + 2;
-                    const dividend = a * ans;
+
+                case 'colors':
+                    const colors = [
+                        { name: 'Verde', hex: '#2ECC71' },
+                        { name: 'Rojo', hex: '#E74C3C' },
+                        { name: 'Azul', hex: '#3498DB' },
+                        { name: 'Amarillo', hex: '#F1C40F' }
+                    ];
+                    const target = colors[Math.floor(Math.random() * colors.length)];
+                    const fruitItems = ['🍎', '', '🍊', '🫐'];
+                    const fruit = fruitItems[Math.floor(Math.random() * fruitItems.length)];
                     return {
-                        type: 'muldiv',
-                        instruction: 'Resuelve la división.',
-                        question: `${dividend} ÷ ${a} = ?`,
+                        type: 'colors',
+                        instruction: 'Marca las etiquetas correctas.',
+                        question: `¿De qué color es esta ${fruit}?`,
+                        correctAnswer: target.name,
+                        options: colors
+                    };
+
+                case 'full-empty':
+                    const fullSide = Math.random() > 0.5 ? 'left' : 'right';
+                    return {
+                        type: 'full-empty',
+                        instruction: 'Responde la pregunta.',
+                        question: '¿Cuál está llena?',
+                        correctAnswer: fullSide,
+                        options: [
+                            { label: 'Izquierda', value: 'left' },
+                            { label: 'Derecha', value: 'right' }
+                        ]
+                    };
+
+                case 'habitats':
+                    const animals = [
+                        { name: 'elefante', icon: '🐘', habitat: 'Sabana', wrong: ['Océano', 'Cielo'] },
+                        { name: 'tiburón', icon: '🦈', habitat: 'Océano', wrong: ['Sabana', 'Cielo'] },
+                        { name: 'águila', icon: '🦅', habitat: 'Cielo', wrong: ['Océano', 'Sabana'] },
+                        { name: 'oso', icon: '🐻', habitat: 'Bosque', wrong: ['Océano', 'Cielo'] }
+                    ];
+                    const animal = animals[Math.floor(Math.random() * animals.length)];
+                    const habitats = [
+                        { name: 'Océano', icon: '🌊' },
+                        { name: 'Sabana', icon: '🌍' },
+                        { name: 'Cielo', icon: '☁️' },
+                        { name: 'Bosque', icon: '🌲' }
+                    ];
+                    const habitatOpts = [
+                        habitats.find(h => h.name === animal.habitat),
+                        ...habitats.filter(h => animal.wrong.includes(h.name)).slice(0, 2)
+                    ].sort(() => Math.random() - 0.5);
+                    return {
+                        type: 'habitats',
+                        instruction: 'Marca las etiquetas correctas.',
+                        question: `¿Dónde vive el/la ${animal.name}?`,
+                        correctAnswer: animal.habitat,
+                        options: habitatOpts
+                    };
+
+                case 'addsub':
+                    const max = diff * 3;
+                    const isAdd = Math.random() > 0.5;
+                    const a = Math.floor(Math.random() * max) + 1;
+                    const b = Math.floor(Math.random() * (isAdd ? max - a : a)) + 1;
+                    const ans = isAdd ? a + b : a - b;
+                    return {
+                        type: 'addsub',
+                        instruction: 'Resuelve la operación.',
+                        question: `${a} ${isAdd ? '+' : '-'} ${b} = ?`,
                         correctAnswer: ans,
-                        options: [ans, ans-1, ans+2, ans+1].filter(x => x > 0).sort(() => Math.random() - 0.5)
-                            .map(n => ({ label: n.toString(), value: n }))
+                        options: [ans, ans+1, ans-1, ans+2].filter(x => x >= 0).sort(() => Math.random() - 0.5)
                     };
+
+                case 'muldiv':
+                    const maxM = Math.min(diff * 2, 12);
+                    if (Math.random() > 0.4) {
+                        const aM = Math.floor(Math.random() * maxM) + 2;
+                        const bM = Math.floor(Math.random() * maxM) + 2;
+                        return {
+                            type: 'muldiv',
+                            instruction: 'Resuelve la multiplicación.',
+                            question: `${aM} × ${bM} = ?`,
+                            correctAnswer: aM * bM,
+                            options: [aM*bM, aM*bM-1, aM*bM+2, aM*bM-3].filter(x => x > 0).sort(() => Math.random() - 0.5)
+                        };
+                    } else {
+                        const ansD = Math.floor(Math.random() * (maxM - 2)) + 2;
+                        const aD = Math.floor(Math.random() * maxM) + 2;
+                        const dividend = aD * ansD;
+                        return {
+                            type: 'muldiv',
+                            instruction: 'Resuelve la división.',
+                            question: `${dividend} ÷ ${aD} = ?`,
+                            correctAnswer: ansD,
+                            options: [ansD, ansD-1, ansD+2, ansD+1].filter(x => x > 0).sort(() => Math.random() - 0.5)
+                        };
+                    }
+
+                default:
+                    return generateExercise('counting', diff);
+            }
+        }
+
+        // ==========================================
+        // FUNCIONES DE UI
+        // ==========================================
+        function showScreen(id) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('world-screen').classList.add('hidden');
+            document.getElementById('exercise-screen').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function renderWorlds() {
+            const container = document.getElementById('worlds-container');
+            container.innerHTML = '';
+            WORLDS.forEach((world, index) => {
+                const isUnlocked = unlockedWorlds.includes(world.id);
+                const bubble = document.createElement('div');
+                bubble.className = `bubble ${!isUnlocked ? 'locked' : ''} ${isUnlocked ? 'float' : ''}`;
+                bubble.style.animationDelay = `${index * 0.2}s`;
+                if (isUnlocked) {
+                    bubble.style.background = `radial-gradient(circle at 30% 30%, ${world.color}40, ${world.color}10)`;
+                }
+                bubble.innerHTML = `
+                    <div class="bubble-icon">${world.icon}</div>
+                    <div class="bubble-label">${world.name}</div>
+                    ${!isUnlocked ? '<div class="lock-overlay">🔒</div>' : ''}
+                `;
+                if (isUnlocked) {
+                    bubble.onclick = () => startExercise(world.id);
+                }
+                container.appendChild(bubble);
+            });
+        }
+
+        function updateWorldUI() {
+            document.getElementById('user-greeting').textContent = `¡Hola, ${user.name}! 👋`;
+            document.getElementById('age-badge').textContent = `${AGE_CONFIG[ageGroup].label} (${ageGroup} años)`;
+            document.getElementById('xp-badge').innerHTML = `⭐ ${stats.stars} &nbsp; 🏆 ${stats.xp} XP`;
+            document.getElementById('level-text').textContent = `Nivel ${stats.level}`;
+            document.getElementById('xp-text').textContent = `${stats.xp % 100}/100 XP`;
+            document.getElementById('progress-fill').style.width = `${stats.xp % 100}%`;
+            document.getElementById('character').textContent = AGE_CONFIG[ageGroup].character;
+            renderWorlds();
+        }
+
+        function renderExercise(exercise) {
+            document.getElementById('instruction-text').textContent = exercise.instruction;
+            document.getElementById('question-text').textContent = exercise.question;
+            document.getElementById('question-counter').textContent = `${questionNum} / ${totalQuestions}`;
+
+            // Render visual
+            const visual = document.getElementById('visual-container');
+            visual.innerHTML = '';
+
+            if (exercise.type === 'counting') {
+                visual.innerHTML = '<div class="objects-container" id="objects-display"></div>';
+                const objDisplay = document.getElementById('objects-display');
+                for (let i = 0; i < exercise.count; i++) {
+                    const obj = document.createElement('div');
+                    obj.className = 'counting-object';
+                    obj.textContent = exercise.item;
+                    obj.style.animationDelay = `${i * 0.1}s`;
+                    objDisplay.appendChild(obj);
+                }
+            } else if (exercise.type === 'full-empty') {
+                visual.innerHTML = `
+                    <div style="display:flex;justify-content:center;gap:40px;margin:20px 0">
+                        <div class="gumball-machine">
+                            <div class="gumball-globe">
+                                ${exercise.correctAnswer === 'left' ? '<div class="gumballs-filled">' + Array(25).fill(0).map((_, i) => `<div class="gumball" style="background:${['#FF6B6B','#4ECDC4','#FFE66D','#95E1D3'][i%4]}"></div>`).join('') + '</div>' : ''}
+                            </div>
+                            <div style="width:80px;height:100px;background:linear-gradient(180deg,#E74C3C,#C0392B);margin:0 auto;border-radius:0 0 20px 20px"></div>
+                        </div>
+                        <div class="gumball-machine">
+                            <div class="gumball-globe">
+                                ${exercise.correctAnswer === 'right' ? '<div class="gumballs-filled">' + Array(25).fill(0).map((_, i) => `<div class="gumball" style="background:${['#FF6B6B','#4ECDC4','#FFE66D','#95E1D3'][i%4]}"></div>`).join('') + '</div>' : ''}
+                            </div>
+                            <div style="width:80px;height:100px;background:linear-gradient(180deg,#E74C3C,#C0392B);margin:0 auto;border-radius:0 0 20px 20px"></div>
+                        </div>
+                    </div>
+                `;
+            } else if (exercise.type === 'colors') {
+                const fruitItems = ['🍎', '', '🍊', ''];
+                const fruit = fruitItems[Math.floor(Math.random() * fruitItems.length)];
+                visual.innerHTML = `<div style="font-size:80px;margin:20px 0">${fruit}</div>`;
+            } else if (exercise.type === 'habitats') {
+                const animalMatch = exercise.options.find(h => h.icon);
+                const animalIcon = exercise.options.find(h => ['🐘','🦈','','🐻'].includes(h.icon))?.icon || '🐘';
+                visual.innerHTML = `<div style="font-size:100px;margin:20px 0">${animalIcon}</div>`;
+            }
+
+            // Render options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            exercise.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+
+                if (exercise.type === 'colors') {
+                    btn.innerHTML = `<div style="width:32px;height:32px;border-radius:50%;background:${opt.hex};margin-right:12px"></div>${opt.name}`;
+                    btn.onclick = () => handleAnswer(opt.name, btn);
+                } else if (exercise.type === 'habitats') {
+                    btn.innerHTML = `<span style="font-size:32px;margin-right:12px">${opt.icon}</span>${opt.name}`;
+                    btn.onclick = () => handleAnswer(opt.name, btn);
+                } else if (exercise.type === 'full-empty') {
+                    btn.textContent = opt.label;
+                    btn.onclick = () => handleAnswer(opt.value, btn);
+                } else {
+                    btn.textContent = opt;
+                    btn.onclick = () => handleAnswer(opt, btn);
+                }
+
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('feedback-container').innerHTML = '';
+        }
+
+        let selectedButton = null;
+
+        function handleAnswer(value, btn) {
+            if (btn.classList.contains('selected') || btn.classList.contains('wrong')) return;
+
+            const isCorrect = String(value) === String(currentExercise.correctAnswer);
+            btn.classList.add('selected');
+
+            if (!isCorrect) {
+                btn.classList.remove('selected');
+                btn.classList.add('wrong');
+                setTimeout(() => btn.classList.remove('wrong'), 500);
+            }
+
+            if (isCorrect) correctCount++;
+
+            const feedback = document.getElementById('feedback-container');
+            feedback.innerHTML = `<div class="${isCorrect ? 'pop' : 'shake'}" style="padding:16px 32px;border-radius:16px;background:${isCorrect ? '#2ECC71' : '#E74C3C'};color:white;font-size:24px;font-weight:800;display:inline-block;margin-top:20px">
+                ${isCorrect ? ' ¡Excelente!' : '💪 ¡Sigue intentando!'}
+            </div>`;
+
+            setTimeout(() => {
+                if (questionNum >= totalQuestions) {
+                    completeExercise();
+                } else {
+                    questionNum++;
+                    currentExercise = generateExercise(AGE_CONFIG[ageGroup].exercises[Math.floor(Math.random() * AGE_CONFIG[ageGroup].exercises.length)], difficulty);
+                    renderExercise(currentExercise);
+                }
+            }, 1500);
+        }
+
+        function completeExercise() {
+            const xpGain = correctCount * 10;
+            const starsGain = correctCount >= totalQuestions * 0.8 ? 1 : 0;
+
+            stats.xp += xpGain;
+            stats.stars += starsGain;
+            stats.level = Math.floor(stats.xp / 100) + 1;
+
+            if (correctCount === totalQuestions) {
+                difficulty = Math.min(AGE_CONFIG[ageGroup].maxDifficulty, difficulty + 1);
+            }
+
+            // Desbloquear siguiente mundo si aplica
+            if (correctCount >= totalQuestions * 0.7) {
+                const nextWorld = WORLDS.find(w => !unlockedWorlds.includes(w.id));
+                if (nextWorld) {
+                    unlockedWorlds.push(nextWorld.id);
                 }
             }
-        };
+
+            saveData();
+            questionNum = 1;
+            correctCount = 0;
+            showWorld();
+        }
+
+        function startExercise(worldId) {
+            const exerciseType = AGE_CONFIG[ageGroup].exercises[Math.floor(Math.random() * AGE_CONFIG[ageGroup].exercises.length)];
+            currentExercise = generateExercise(exerciseType, difficulty);
+            questionNum = 1;
+            correctCount = 0;
+            renderExercise(currentExercise);
+            showScreen('exercise-screen');
+        }
+
+        function showWorld() {
+            updateWorldUI();
+            showScreen('world-screen');
+        }
+
+        function logout() {
+            localStorage.removeItem('mq_smartick_data');
+            user = null;
+            ageGroup = null;
+            showScreen('login-screen');
+        }
 
         // ==========================================
-        // COMPONENTES PRINCIPALES
+        // INICIALIZACIÓN
         // ==========================================
-        function App() {
-            const [user, setUser] = useState(null);
-            const [screen, setScreen] = useState('login');
-            const [ageGroup, setAgeGroup] = useState(null);
-            const [stats, setStats] = useState({ xp: 0, stars: 0, level: 1, completedWorlds: [] });
-            const [unlockedWorlds, setUnlockedWorlds] = useState([]);
-            const [currentExercise, setCurrentExercise] = useState(null);
-            const [difficulty, setDifficulty] = useState(1);
-
-            useEffect(() => {
+        function init() {
+            // Cargar datos guardados
+            try {
                 const saved = localStorage.getItem('mq_smartick_data');
                 if (saved) {
                     const d = JSON.parse(saved);
-                    setUser(d.user);
-                    setAgeGroup(d.ageGroup);
-                    setStats(d.stats);
-                    setUnlockedWorlds(d.unlockedWorlds || []);
-                    setDifficulty(d.difficulty || 1);
+                    user = d.user;
+                    ageGroup = d.ageGroup;
+                    stats = d.stats;
+                    unlockedWorlds = d.unlockedWorlds || [];
+                    difficulty = d.difficulty || 1;
+                    showWorld();
+                    return;
                 }
-            }, []);
+            } catch(e) {}
 
-            useEffect(() => {
-                if (user) {
-                    localStorage.setItem('mq_smartick_data', JSON.stringify({
-                        user, ageGroup, stats, unlockedWorlds, difficulty
-                    }));
+            // Botón de inicio
+            document.getElementById('start-btn').onclick = () => {
+                const name = document.getElementById('name-input').value.trim();
+                const age = parseInt(document.getElementById('age-input').value);
+
+                if (!name || age < 4 || age > 14) {
+                    alert('Por favor ingresa tu nombre y edad (4-14 años)');
+                    return;
                 }
-            }, [user, ageGroup, stats, unlockedWorlds, difficulty]);
 
-            const handleLogin = (name, age) => {
                 let group = age <= 5 ? '4-5' : age <= 7 ? '6-7' : age <= 9 ? '8-9' : age <= 12 ? '10-12' : '13-14';
-                const config = AGE_CONFIG[group];
-                
-                setUser({ name, age, group });
-                setAgeGroup(group);
-                setUnlockedWorlds(config.worlds.slice(0, 2));
-                setScreen('world');
-            };
 
-            const startExercise = (worldId) => {
-                const config = AGE_CONFIG[ageGroup];
-                const exerciseType = config.exercises[Math.floor(Math.random() * config.exercises.length)];
-                const generator = ExerciseGenerator[exerciseType];
-                const exercise = generator ? generator(difficulty) : ExerciseGenerator.counting(difficulty);
-                setCurrentExercise(exercise);
-                setScreen('exercise');
-            };
+                user = { name, age, group };
+                ageGroup = group;
+                unlockedWorlds = AGE_CONFIG[group].worlds.slice(0, 2);
+                stats = { xp: 0, stars: 0, level: 1, completedWorlds: [] };
+                difficulty = 1;
 
-            const completeExercise = (correct, total) => {
-                const xpGain = correct * 10;
-                const starsGain = correct >= total * 0.8 ? 1 : 0;
-                
-                setStats(s => ({
-                    ...s,
-                    xp: s.xp + xpGain,
-                    stars: s.stars + starsGain,
-                    level: Math.floor((s.xp + xpGain) / 100) + 1
-                }));
-                
-                if (correct === total) {
-                    setDifficulty(d => Math.min(AGE_CONFIG[ageGroup].maxDifficulty, d + 1));
-                }
-                
-                setScreen('world');
+                saveData();
+                showWorld();
             };
-
-            return (
-                <div>
-                    {screen === 'login' && <LoginScreen onStart={handleLogin} />}
-                    {screen === 'world' && (
-                        <WorldMap 
-                            user={user} 
-                            ageGroup={ageGroup} 
-                            stats={stats} 
-                            unlockedWorlds={unlockedWorlds}
-                            onStartExercise={startExercise}
-                            onLogout={() => { localStorage.removeItem('mq_smartick_data'); setUser(null); setScreen('login'); }}
-                        />
-                    )}
-                    {screen === 'exercise' && currentExercise && (
-                        <ExerciseScreen 
-                            exercise={currentExercise} 
-                            ageGroup={ageGroup}
-                            onComplete={completeExercise}
-                            onBack={() => setScreen('world')}
-                        />
-                    )}
-                </div>
-            );
         }
 
-        function LoginScreen({ onStart }) {
-            const [name, setName] = useState('');
-            const [age, setAge] = useState('');
-
-            return (
-                <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: 20 }}>
-                    <div className="card pop" style={{ background: 'white', borderRadius: 32, padding: 40, maxWidth: 450, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-                        <div className="float" style={{ fontSize: 80, textAlign: 'center', marginBottom: 16 }}>🎓</div>
-                        <h1 style={{ fontSize: 36, fontWeight: 900, textAlign: 'center', marginBottom: 8, color: '#2C3E50' }}>MathQuest</h1>
-                        <p style={{ textAlign: 'center', color: '#7F8C8D', marginBottom: 32, fontSize: 16 }}>Aprende jugando como en Smartick</p>
-                        
-                        <input 
-                            placeholder="Tu nombre" 
-                            value={name} 
-                            onChange={e => setName(e.target.value)} 
-                            style={{ width: '100%', padding: '16px 20px', borderRadius: 16, border: '3px solid #E0E0E0', fontSize: 18, fontFamily: 'Nunito', marginBottom: 16, transition: 'border-color 0.3s' }}
-                        />
-                        
-                        <input 
-                            type="number" 
-                            placeholder="Tu edad (4-14)" 
-                            value={age} 
-                            onChange={e => setAge(e.target.value)} 
-                            min="4" 
-                            max="14" 
-                            style={{ width: '100%', padding: '16px 20px', borderRadius: 16, border: '3px solid #E0E0E0', fontSize: 18, fontFamily: 'Nunito', marginBottom: 24 }}
-                        />
-                        
-                        <button 
-                            onClick={() => name && age >= 4 && age <= 14 && onStart(name, parseInt(age))} 
-                            style={{ 
-                                width: '100%', 
-                                padding: '18px', 
-                                fontSize: 20, 
-                                fontWeight: 800, 
-                                background: 'linear-gradient(135deg, #667eea, #764ba2)', 
-                                color: 'white', 
-                                border: 'none', 
-                                borderRadius: 16, 
-                                cursor: 'pointer',
-                                opacity: name && age >= 4 && age <= 14 ? 1 : 0.5,
-                                boxShadow: '0 8px 24px rgba(102,126,234,0.4)'
-                            }}>
-                            🚀 ¡Comenzar Aventura!
-                        </button>
-                    </div>
-                </div>
-            );
+        function saveData() {
+            localStorage.setItem('mq_smartick_data', JSON.stringify({
+                user, ageGroup, stats, unlockedWorlds, difficulty
+            }));
         }
 
-        function WorldMap({ user, ageGroup, stats, unlockedWorlds, onStartExercise, onLogout }) {
-            const config = AGE_CONFIG[ageGroup];
-            
-            const worlds = [
-                { id: 'numeros', name: 'Números', icon: '🔢', color: '#FF6B6B' },
-                { id: 'colores', name: 'Colores', icon: '🎨', color: '#4ECDC4' },
-                { id: 'formas', name: 'Formas', icon: '🔷', color: '#FFE66D' },
-                { id: 'sumas', name: 'Sumas', icon: '➕', color: '#95E1D3' },
-                { id: 'restas', name: 'Restas', icon: '➖', color: '#F38181' },
-                { id: 'multiplicacion', name: 'Multiplicar', icon: '✖️', color: '#AA96DA' }
-            ];
-
-            return (
-                <div className="world-bg" style={{ minHeight: '100vh', paddingBottom: 100 }}>
-                    <header style={{ 
-                        background: 'rgba(255,255,255,0.9)', 
-                        padding: '16px 24px', 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                        position: 'sticky',
-                        top: 0,
-                        zIndex: 10
-                    }}>
-                        <div>
-                            <h1 style={{ fontSize: 24, fontWeight: 900, color: '#2C3E50' }}>¡Hola, {user.name}! 👋</h1>
-                            <span style={{ background: '#3498DB', color: 'white', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
-                                {config.label} ({ageGroup} años)
-                            </span>
-                        </div>
-                        
-                        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-                            <div className="xp-badge">
-                                <span>⭐</span>
-                                <span>{stats.stars}</span>
-                            </div>
-                            <div className="xp-badge" style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}>
-                                <span>🏆</span>
-                                <span>{stats.xp} XP</span>
-                            </div>
-                            <button onClick={onLogout} style={{ background: '#E74C3C', color: 'white', border: 'none', borderRadius: 12, padding: '8px 16px', cursor: 'pointer', fontWeight: 700 }}>🚪</button>
-                        </div>
-                    </header>
-
-                    <div style={{ maxWidth: 600, margin: '24px auto', padding: '0 20px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontWeight: 700, color: '#2C3E50' }}>
-                            <span>Nivel {stats.level}</span>
-                            <span>{stats.xp % 100}/100 XP</span>
-                        </div>
-                        <div className="progress-bar">
-                            <div className="progress-fill" style={{ width: `${stats.xp % 100}%` }}></div>
-                        </div>
-                    </div>
-
-                    <div style={{ 
-                        maxWidth: 900, 
-                        margin: '40px auto', 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        alignItems: 'center', 
-                        gap: 32,
-                        padding: '0 20px'
-                    }}>
-                        <h2 style={{ fontSize: 28, fontWeight: 900, color: '#2C3E50', textShadow: '2px 2px 4px rgba(255,255,255,0.8)' }}>
-                            🌍 Mundos de Aprendizaje
-                        </h2>
-                        
-                        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 32 }}>
-                            {worlds.map((world, index) => {
-                                const isUnlocked = unlockedWorlds.includes(world.id);
-                                
-                                return (
-                                    <div 
-                                        key={world.id}
-                                        className={`bubble ${!isUnlocked ? 'locked' : ''} ${isUnlocked ? 'float' : ''}`}
-                                        style={{ 
-                                            animationDelay: `${index * 0.2}s`,
-                                            background: isUnlocked ? `radial-gradient(circle at 30% 30%, ${world.color}40, ${world.color}10)` : undefined
-                                        }}
-                                        onClick={() => isUnlocked && onStartExercise(world.id)}
-                                    >
-                                        <div className="bubble-icon">{world.icon}</div>
-                                        <div className="bubble-label">{world.name}</div>
-                                        {!isUnlocked && (
-                                            <div className="lock-overlay">🔒</div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    <div className="character">{config.character}</div>
-
-                    <div style={{ 
-                        position: 'fixed', 
-                        bottom: 20, 
-                        left: '50%', 
-                        transform: 'translateX(-50%)',
-                        background: 'linear-gradient(135deg, #FFD700, #FFA500)',
-                        padding: '16px 32px',
-                        borderRadius: 24,
-                        boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-                        cursor: 'pointer',
-                        fontWeight: 800,
-                        fontSize: 16,
-                        color: '#2C3E50',
-                        zIndex: 100
-                    }} className="pulse">
-                        🎯 Reto Diario: Completa 3 ejercicios
-                    </div>
-                </div>
-            );
-        }
-
-        function ExerciseScreen({ exercise, ageGroup, onComplete, onBack }) {
-            const [selected, setSelected] = useState(null);
-            const [feedback, setFeedback] = useState(null);
-            const [questionNum, setQuestionNum] = useState(1);
-            const [correctCount, setCorrectCount] = useState(0);
-            const totalQuestions = 10;
-
-            const handleSelect = (value) => {
-                if (feedback) return;
-                setSelected(value);
-                const isCorrect = String(value) === String(exercise.correctAnswer);
-                setFeedback(isCorrect ? 'correct' : 'wrong');
-                
-                if (isCorrect) {
-                    setCorrectCount(c => c + 1);
-                }
-                
-                setTimeout(() => {
-                    if (questionNum >= totalQuestions) {
-                        onComplete(correctCount + (isCorrect ? 1 : 0), totalQuestions);
-                    } else {
-                        setQuestionNum(q => q + 1);
-                        setSelected(null);
-                        setFeedback(null);
-                        const generator = ExerciseGenerator[exercise.type];
-                        if (generator) {
-                            // Generar nuevo ejercicio del mismo tipo
-                        }
-                    }
-                }, 1500);
-            };
-
-            return (
-                <div style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #E0F6FF 0%, #98D8C8 100%)', padding: 20 }}>
-                    <div style={{ 
-                        maxWidth: 800, 
-                        margin: '0 auto', 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        marginBottom: 24
-                    }}>
-                        <button onClick={onBack} style={{ background: 'white', border: 'none', borderRadius: 12, padding: '12px 20px', cursor: 'pointer', fontWeight: 700, fontSize: 16, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                            ← Volver
-                        </button>
-                        <div style={{ background: 'white', padding: '8px 20px', borderRadius: 20, fontWeight: 800, fontSize: 18 }}>
-                            {questionNum} / {totalQuestions}
-                        </div>
-                    </div>
-
-                    <div className="card pop" style={{ maxWidth: 800, margin: '0 auto', background: 'white', borderRadius: 32, padding: 40, boxShadow: '0 12px 40px rgba(0,0,0,0.15)' }}>
-                        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-                            <div style={{ fontSize: 18, color: '#7F8C8D', marginBottom: 8 }}>{exercise.instruction}</div>
-                            <h2 style={{ fontSize: 32, fontWeight: 900, color: '#2C3E50', marginBottom: 24 }}>{exercise.question}</h2>
-                            
-                            {/* Visualización CORREGIDA para conteo */}
-                            {exercise.type === 'counting' && exercise.selectedItem && (
-                                <div className="objects-container">
-                                    {Array(exercise.count).fill(exercise.selectedItem).map((item, idx) => (
-                                        <div key={idx} className="counting-object" style={{animationDelay: `${idx * 0.1}s`}}>
-                                            {item}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                            
-                            {/* Visualización para máquina de chicles */}
-                            {exercise.type === 'full-empty' && (
-                                <div style={{display:'flex',justifyContent:'center',gap:40px,margin:'20px 0'}}>
-                                    <div className="gumball-machine">
-                                        <div className="gumball-globe">
-                                            {exercise.correctAnswer === 'left' && (
-                                                <div className="gumballs-filled">
-                                                    {Array(25).fill(0).map((_, i) => (
-                                                        <div key={i} className="gumball" style={{background:['#FF6B6B','#4ECDC4','#FFE66D','#95E1D3'][i%4]}}></div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div style={{width:80px,height:100px;background:'linear-gradient(180deg,#E74C3C,#C0392B)',margin:'0 auto',borderRadius:'0 0 20px 20px'}}></div>
-                                    </div>
-                                    <div className="gumball-machine">
-                                        <div className="gumball-globe">
-                                            {exercise.correctAnswer === 'right' && (
-                                                <div className="gumballs-filled">
-                                                    {Array(25).fill(0).map((_, i) => (
-                                                        <div key={i} className="gumball" style={{background:['#FF6B6B','#4ECDC4','#FFE66D','#95E1D3'][i%4]}}></div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div style={{width:80px,height:100px;background:'linear-gradient(180deg,#E74C3C,#C0392B)',margin:'0 auto',borderRadius:'0 0 20px 20px'}}></div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 500, margin: '0 auto' }}>
-                            {exercise.options.map((opt, idx) => {
-                                const isSelected = selected === opt.value;
-                                const isWrong = feedback === 'wrong' && isSelected;
-                                const isCorrect = feedback === 'correct' && isSelected;
-                                
-                                return (
-                                    <div 
-                                        key={idx}
-                                        className={`tag-option ${isSelected ? 'selected' : ''} ${isWrong ? 'wrong' : ''}`}
-                                        onClick={() => handleSelect(opt.value)}
-                                        style={{
-                                            borderColor: isCorrect ? '#2ECC71' : isWrong ? '#E74C3C' : '#E0E0E0',
-                                            background: isCorrect ? '#E8F8F0' : isWrong ? '#FDEDEC' : 'white',
-                                            cursor: feedback ? 'not-allowed' : 'pointer'
-                                        }}
-                                    >
-                                        {exercise.type === 'colors' && opt.color && (
-                                            <div style={{width:32,height:32,borderRadius:'50%',background:opt.color,marginRight:12}}></div>
-                                        )}
-                                        {exercise.type === 'habitats' && opt.icon && (
-                                            <span style={{fontSize:32,marginRight:12}}>{opt.icon}</span>
-                                        )}
-                                        {opt.label}
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {feedback && (
-                            <div className={`pop ${feedback === 'wrong' ? 'shake' : ''}`} style={{ 
-                                textAlign: 'center', 
-                                marginTop: 24, 
-                                padding: '16px 32px', 
-                                borderRadius: 16, 
-                                background: feedback === 'correct' ? '#2ECC71' : '#E74C3C', 
-                                color: 'white', 
-                                fontSize: 24, 
-                                fontWeight: 800 
-                            }}>
-                                {feedback === 'correct' ? '🎉 ¡Excelente!' : '💪 ¡Sigue intentando!'}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
-        }
-
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+        // Iniciar app cuando cargue la página
+        window.onload = init;
     </script>
 </body>
 </html>
